@@ -1,0 +1,17 @@
+# tex
+*.aux
+*.log
+*.out
+*.synctex.gz
+*.toc
+*.bbl
+*.run.xml
+*.blg
+main-blx.bib
+main.pdf
+
+# cpp
+*.o
+
+# vscode
+.vscode/
