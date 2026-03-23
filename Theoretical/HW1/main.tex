@@ -1,0 +1,279 @@
+\documentclass[a4paper]{article}
+\usepackage{ctex}
+\usepackage[affil-it]{authblk}
+\usepackage[backend=bibtex,style=numeric]{biblatex}
+\usepackage{amsmath,amsthm,amssymb,amsfonts}
+\usepackage{bm}
+
+\usepackage{geometry}
+\geometry{margin=1.5cm, vmargin={0pt,1cm}}
+\setlength{\topmargin}{-1cm}
+\setlength{\paperheight}{29.7cm}
+\setlength{\textheight}{25.3cm}
+
+\addbibresource{citation.bib}
+
+\begin{document}
+% =================================================
+\title{微分方程数值解 2026 春夏作业一}
+
+\author{曾申昊 3220100701
+  \thanks{邮箱: \texttt{3097714673@qq.com}
+                            \texttt{或} \texttt{3220100701@zju.edu.cn}}}
+\affil{浙江大学}
+
+\date{更新时间: \today}
+
+\maketitle
+
+% ============================================
+\section*{Exercise 10.16}
+
+\par 由题意知 $g_1=C_1h+O(h^2)$，$g_N=C_Nh+O(h^2)$
+以及 $g_j=C_jh^2+O(h^3)$，其中 $j=2,3,\cdots,N-1$。
+接下来根据定义对不同范数下的 $\lVert \mathbf{g} \rVert$ 进行估计。
+\begin{equation}
+    \begin{aligned}
+        \lVert \mathbf{g} \rVert_{\infty}
+        = \max_{1 \leq j \leq N} |g_j| 
+        &= \max \{ |g_1|, |g_N|, \max_{2 \leq j \leq N-1} |g_j| \} \\
+        &= \max \{ C_1h+O(h^2), C_Nh+O(h^2), \max_{2 \leq j \leq N-1} (C_jh^2+O(h^3)) \} \\
+        &= \max \{ O(h), O(h), O(h^2) \} \\
+        &= O(h)
+    \end{aligned}
+\end{equation}
+\begin{equation}
+    \begin{aligned}
+        \lVert \mathbf{g} \rVert_1
+        = h\sum_{j=1}^N |g_j|
+        &= h \left( |g_1| + |g_N| + \sum_{j=2}^{N-1} |g_j| \right) \\
+        &= h \left( C_1h+O(h^2) + C_Nh+O(h^2) + \sum_{j=2}^{N-1} (C_jh^2+O(h^3)) \right) \\
+        &= h \left( O(h) + O(h) + (N-2)O(h^2) \right) \\
+        &= O(h^2)
+    \end{aligned}
+\end{equation}
+\begin{equation}
+    \begin{aligned}
+        \lVert \mathbf{g} \rVert_2
+        = \left( h\sum_{j=1}^N |g_j|^2 \right)^{\frac{1}{2}}
+        &= \left(h \left[ |g_1|^2 + |g_N|^2 + \sum_{j=2}^{N-1} |g_j|^2 \right]\right)^{\frac{1}{2}} \\
+        &= \left( h \left[
+            O(h^2)+O(h^2)+(N-2)O(h^4)
+        \right] \right)^{\frac{1}{2}} \\
+        &= O(h^{\frac{3}{2}})
+    \end{aligned}
+\end{equation}
+
+\section*{Exercise 10.26}
+
+\par 一维FDM中矩阵 $A$ 的特征向量为:
+\begin{equation}
+    w_{k,j} = \sin\left(\frac{jk\pi}{m+1}\right) \qquad k,j = 1,2,\ldots,m
+\end{equation}
+\par 下面验证其正交性：
+\begin{equation}
+    \begin{aligned}
+        \langle \mathbf{w}_i, \mathbf{w}_k \rangle
+        &= \sum_{j=1}^m \sin\left(\frac{ji\pi}{m+1}\right) \sin\left(\frac{jk\pi}{m+1}\right) \\
+        &= \frac{1}{2}\sum_{j=1}^m \left[ \cos\left(\frac{j(i-k)\pi}{m+1}\right) - \cos\left(\frac{j(i+k)\pi}{m+1}\right) \right] \\
+    \end{aligned}
+\end{equation}
+\par 我们记 $a = \frac{(i-k)\pi}{m+1}$ 或者 $a = \frac{(i+k)\pi}{m+1}$，
+对于这两种情况都有 $(m+1)a\propto \pi$，则有
+\begin{equation}
+    \begin{aligned}
+        \sum_{j=1}^m \cos (ja)
+        &= \frac{\sum_{j=1}^m \sin\left(\frac{a}{2}\right)\cos (ja)}
+        {\sin\left(\frac{a}{2}\right)} \\
+        &= \frac{\sum_{j=1}^m \left[-\sin\left(ja-\frac{a}{2}\right)+\sin\left(ja+\frac{a}{2}\right)\right]}
+        {2\sin\left(\frac{a}{2}\right)} \\
+        &= \frac{-\sin\left(\frac{a}{2}\right)+\sin\left(\frac{(2m+1)a}{2}\right)}
+        {2\sin\left(\frac{a}{2}\right)} \\
+        &= \frac{\sin\left(\frac{ma}{2}\right)\cos\left(\frac{(m+1)a}{2}\right)}
+        {\sin\left(\frac{a}{2}\right)} \\
+        &= \frac{\left[
+            \sin\left(\frac{(m+1)a}{2}\right)\cos\left(\frac{a}{2}\right)
+            -\sin\left(\frac{a}{2}\right)\cos\left(\frac{(m+1)a}{2}\right)
+        \right]\cos\left(\frac{(m+1)a}{2}\right)}
+        {\sin\left(\frac{a}{2}\right)} \\
+        &= \frac{1}{2}\sin\left((m+1)a\right)\cot\left(\frac{a}{2}\right)
+        - \cos^2\left(\frac{(m+1)a}{2}\right) \\
+        &= - \cos^2\left(\frac{(m+1)a}{2}\right)
+    \end{aligned}
+\end{equation}
+\par 因此有
+\begin{equation}
+    \sum_{j=1}^m \cos (ja)
+    =\left\{
+        \begin{aligned}
+            &-1 &\qquad &(m+1)a = 2n\pi \\
+            &0 &\qquad &(m+1)a = (2n+1)\pi
+        \end{aligned}
+    \right.
+\end{equation}
+\par 下面进行分类讨论，当 $i=k$ 时有：
+\begin{equation}
+    \begin{aligned}
+        \langle \mathbf{w}_k, \mathbf{w}_k \rangle
+        &= \frac{1}{2}\sum_{j=1}^m \left[ \cos\left(\frac{j(k-k)\pi}{m+1}\right) - \cos\left(\frac{j(k+k)\pi}{m+1}\right) \right] \\
+        &= \frac{1}{2}\left[ \sum_{j=1}^m 1 - \sum_{j=1}^m\cos\left(\frac{j \cdot 2k \pi}{m+1}\right) \right] \\
+        &= \frac{1}{2}\left[ m - (-1) \right] \\
+        &=\frac{m+1}{2}
+    \end{aligned}
+\end{equation}
+\par 当 $i\neq k$ 时，由于 $(i-k)$ 和 $(i+k)$ 的奇偶性相同，易得
+$\langle \mathbf{w}_i, \mathbf{w}_k \rangle = 0$。
+
+\section*{Exercise 10.38}
+
+\par 矩阵 $A_E$ 具体分量为：
+\begin{equation}
+    A_E=
+    \frac{1}{h^2}
+    \begin{bmatrix}
+        -h  & h  &    &    &    & \\
+        1   & -2 & 1  &    &    & \\
+            & 1  & -2 & 1  &    & \\
+            &    & \ddots & \ddots & \ddots & \\
+            &    &    & 1  & -2 & 1\\
+            &    &    &    & 0  & h^2
+    \end{bmatrix}
+\end{equation}
+\par 要求矩阵的逆 $B_E$ 的第一列，等价于求解方程：
+\begin{equation}
+    A_E 
+    \begin{bmatrix}
+        b_{0} \\
+        b_{1} \\
+        b_{2} \\
+        \vdots \\
+        b_{m} \\
+        b_{m+1}   
+    \end{bmatrix}
+    =
+    \begin{bmatrix}
+        1 \\
+        0 \\
+        0 \\
+        \vdots \\
+        0 \\
+        0   
+    \end{bmatrix}
+\end{equation}
+\par 也就是求解如下差分方程：
+\begin{equation}
+    \left\{
+        \begin{aligned}
+            &-hb_0+hb_1 = h^2 \\
+            &b_{j-1}-2b_j+b_{j+1} = 0 \qquad j=1,2,\cdots,m \\
+            &h^2b_{m+1} = 0
+        \end{aligned}
+    \right.
+\end{equation}
+\par 由前两个方程可知 $b_{j-1}-b_j =-h$ ，其中 $j=1,2,\cdots,m$，
+因此是一个线性函数。易计算得 
+$b_j = [i-(m+1)]h=ih-1$，可证 $b_j \in O(1)$。
+
+\section*{Exercise 10.43}
+
+\begin{equation}
+    \begin{aligned}
+        \tau_{i,j} &= \frac{-1}{h^2}\left[ u(x_i+h,y_j)+u(x_i-h,y_j)+u(x_i,y_j+h)+u(x_i,y_j-h)-4u(x_i,y_j) \right] \\
+        &\quad + \left[ u_{xx}(x_i,y_j) + u_{yy}(x_i,y_j) \right]\\
+        &= \frac{-1}{h^2}\left[
+            u(x_i,y_j) + h u_x(x_i,y_j) + \frac{h^2}{2}u_{xx}(x_i,y_j) + \frac{h^3}{6}u_{xxx}(x_i,y_j) + \frac{h^4}{24}u_{xxxx}(x_i,y_j) + \frac{h^5}{120}u_{xxxxx}(x_i,y_j) + O(h^6)
+        \right.\\
+            &\quad + u(x_i,y_j) - h u_x(x_i,y_j) + \frac{h^2}{2}u_{xx}(x_i,y_j) - \frac{h^3}{6}u_{xxx}(x_i,y_j) + \frac{h^4}{24}u_{xxxx}(x_i,y_j) + \frac{h^5}{120}u_{xxxxx}(x_i,y_j) + O(h^6) \\
+            &\quad + u(x_i,y_j) + h u_y(x_i,y_j) + \frac{h^2}{2}u_{yy}(x_i,y_j) + \frac{h^3}{6}u_{yyy}(x_i,y_j) + \frac{h^4}{24}u_{yyyy}(x_i,y_j) + \frac{h^5}{120}u_{yyyyy}(x_i,y_j) + O(h^6) \\
+            &\quad + u(x_i,y_j) - h u_y(x_i,y_j) + \frac{h^2}{2}u_{yy}(x_i,y_j) - \frac{h^3}{6}u_{yyy}(x_i,y_j) + \frac{h^4}{24}u_{yyyy}(x_i,y_j) - \frac{h^5}{120}u_{yyyyy}(x_i,y_j) + O(h^6)\\ 
+            &\quad \left. -4u(x_i,y_j) \right] + \left[ u_{xx}(x_i,y_j) + u_{yy}(x_i,y_j) \right] \\
+        &= \frac{-1}{12}h^2\left(
+            u_{xxxx}(x_i,y_i)+u_{yyyy}(x_i,y_i)
+        \right)+O(h^4)
+    \end{aligned}
+\end{equation}
+
+\section*{Exercise 10.65}
+
+\begin{equation}
+    \begin{aligned}
+        \tau_{i,j} &= \frac{(1+\theta)u(x_i,y_i)-u(x_i+\theta h,y_i)-\theta u(x_i-h,y_i)}{\frac{1}{2}\theta (1+\theta)h^2}
+        +\frac{(1+\alpha)u(x_i,y_i)-u(x_i,y_i+\alpha h)-\alpha u(x_i,y_i-h)}{\frac{1}{2}\alpha (1+\alpha)h^2} \\
+        &\quad + \left[ u_{xx}(x_i,y_j) + u_{yy}(x_i,y_j) \right]\\
+        &=\frac{-1}{\frac{1}{2}\theta (1+\theta)h^2}\left[
+            u(x_i,y_i) + \theta h u_x(x_i,y_i) + \frac{\theta^2 h^2}{2}u_{xx}(x_i,y_i) + \frac{\theta^3 h^3}{6}u_{xxx}(x_i,y_i) +O(h^4)\right.\\
+            &\quad \left.\theta u(x_i,y_i) - \theta h u_x(x_i,y_i) + \frac{\theta h^2}{2}u_{xx}(x_i,y_i) + \frac{\theta h^3}{6}u_{xxx}(x_i,y_i) +O(h^4) -(1+\theta)u(x_i,y_i) \right] \\
+        &\quad +\frac{-1}{\frac{1}{2}\alpha (1+\alpha)h^2}\left[
+            u(x_i,y_i) + \alpha h u_y(x_i,y_i) + \frac{\alpha^2 h^2}{2}u_{yy}(x_i,y_i) + \frac{\alpha^3 h^3}{6}u_{yyy}(x_i,y_i) + O(h^4)\right.\\
+            &\quad \left.\alpha u(x_i,y_i) - \alpha h u_y(x_i,y_i) + \frac{\alpha h^2}{2}u_{yy}(x_i,y_i) + \frac{\alpha h^3}{6}u_{yyy}(x_i,y_i) + O(h^4) -(1+\alpha)u(x_i,y_i) \right]\\
+            &\quad + \left[ u_{xx}(x_i,y_j) + u_{yy}(x_i,y_j) \right]\\
+        &=\frac{3(1+\theta^2)}{1+\theta}h u_{xxx}(x_i,y_i)
+        + \frac{3(1+\alpha^2)}{1+\alpha}hu_{yyy}(x_i,y_i)
+        + O(h^2)
+    \end{aligned}
+\end{equation}
+
+\section*{Exercise 10.67}
+
+\par 对于 $\forall P \in \mathbf{X}_{\Omega}$ 定义如下函数
+\begin{equation}
+    \psi_{P} :=
+    \left\{
+        \begin{aligned}
+            &E_P+\frac{T_1}{C_1}\phi_{P} \qquad & P \in \mathbf{X}_{1} \\
+            &E_P+\frac{T_2}{C_2}\phi_{P} \qquad & P \in \mathbf{X}_{2}
+        \end{aligned}
+    \right.
+\end{equation}
+\par 我们知道 $L_h\psi_{P} = -T_P$，作用 $L_h$ 算子可得
+\begin{equation}
+    L_h\psi_{P} \leq
+    -T_P - T_1
+    \leq 0
+    \qquad
+    P \in \mathbf{X}_{1}
+\end{equation}
+\begin{equation}
+    L_h\psi_{P} \leq
+    -T_P - T_2
+    \leq 0
+    \qquad
+    P \in \mathbf{X}_{2}
+\end{equation}
+\par 并且有 $\max_{P\in \mathbf{X}_{\Omega}} \psi_{P}\geq0$，应用离散最大值原理
+并注意在边界上有 $E_Q=0$：
+\begin{equation}
+    \begin{aligned}
+        E_P\leq \max_{P \in \mathbf{X}_{\Omega}} \psi_{P} 
+        &\leq \max \left\{
+            \max_{P \in \mathbf{X}_{1}}\left[E_P+\frac{T_1}{C_1} \phi_{P}\right], 
+            \max_{P \in \mathbf{X}_{2}}\left[E_P+\frac{T_2}{C_2} \phi_{P}\right]
+        \right\}\\
+        &\leq \max \left\{
+            \max_{Q \in \mathbf{X}_{1}\bigcap \mathbf{X}_{\partial\Omega}}\left[E_Q+\frac{T_1}{C_1} \phi(Q)\right], 
+            \max_{Q \in \mathbf{X}_{2}\bigcap \mathbf{X}_{\partial\Omega}}\left[E_Q+\frac{T_2}{C_2} \phi(Q)\right]
+        \right\}\\
+        &\leq \left(
+            \max_{Q \in \mathbf{X}_{\partial\Omega}} \phi(Q)
+        \right)
+        \max \left\{
+            \frac{T_1}{C_1}, \frac{T_2}{C_2}
+        \right\}
+    \end{aligned}
+\end{equation}
+\par 类似可证
+\begin{equation}
+    -E_P\leq
+    \left(
+        \max_{Q \in \mathbf{X}_{\partial\Omega}} \phi(Q)
+    \right)
+    \max \left\{
+        \frac{T_1}{C_1}, \frac{T_2}{C_2}
+    \right\}
+\end{equation}
+
+% ===============================================
+
+\printbibliography
+
+\end{document}
