@@ -12,6 +12,7 @@ main.pdf
 
 # cpp
 *.o
+*.d
 
 # vscode
 .vscode/
