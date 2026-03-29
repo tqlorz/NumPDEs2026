@@ -12,17 +12,9 @@ JsonInfo::JsonInfo(const string &filename) {
     InitJsonInfo(filename);
 }
 
-/// @brief Initialize from json file and cheak the data
+/// @brief Open the json file and parse the data
 /// @param filename
 void JsonInfo::InitJsonInfo(const string &filename) {
-    Json::Value _root = OpenJsonFile(filename);
-    InitFromJsonFile(_root);
-}
-
-/// @brief Open the json file and parse the data
-/// @param filename 
-/// @return Json::Value root, a data structure defined in jsoncpp
-Json::Value JsonInfo::OpenJsonFile(const string &filename) const {
     ifstream infile(filename);
     if(!infile.is_open()) {
         cerr << "Error in ReadJsonFile: fail to open file" << endl; 
@@ -31,38 +23,38 @@ Json::Value JsonInfo::OpenJsonFile(const string &filename) const {
 
     Json::CharReaderBuilder ReaderBuilder;
     ReaderBuilder["emitUTF8"] = true;
-    Json::Value root;
 
     string errs;
-    if (!Json::parseFromStream(ReaderBuilder, infile, &root, &errs)) {
+    if (!Json::parseFromStream(ReaderBuilder, infile, &_root, &errs)) {
         cerr << "Error in ReadJsonFile: fail to parse Json" << endl;
         exit(EXIT_SUCCESS); 
     }
 
     cout << "The data has been read from " << filename << endl;
     infile.close();
-    return root;
 }
 
-/// @brief Read the data from json file
-/// @param root 
-void JsonInfo::InitFromJsonFile(const Json::Value &root) {
-    _n = root["n"].asInt();
-    _RectangleBoundaryCondition = root["Rectangle"]["BoundaryCondition"].asString();
-    _CircleBoundaryCondition = root["Circle"]["BoundaryCondition"].asString();
-    _RectangleLen.first = root["Rectangle"]["Len"][0].asDouble(), _RectangleLen.second = root["Rectangle"]["Len"][1].asDouble();
-    _CircleCenter.first = root["Circle"]["Center"][0].asDouble(), _CircleCenter.second = root["Circle"]["Center"][1].asDouble();
-    _CircleRadius = root["Circle"]["Radius"].asDouble();
+TopologyInfo JsonInfo::GetTopologyInfo() const {
+    int _n = n();
+    Rectangle _Rectangle(0, 0, rectangle_width(), rectangle_height());
+    Circle _Circle(circle_center_x(), circle_center_y(), circle_radius());
+    vector<string> _RectangleBoundaryCondition = rectangle_boundary_condition();
+    string _CircleBoundaryCondition = circle_boundary_condition();
+    return TopologyInfo(_n, _Rectangle, _Circle, _RectangleBoundaryCondition, _CircleBoundaryCondition);
 }
 
 /// @brief Print the necessary information into terminal
 void JsonInfo::PrintJsonInfo() const {
-    cout << "========================================" << endl;
-    cout << "n: " << _n << endl;
-    cout << "rectangle length: width = " << _RectangleLen.first << ", height = " << _RectangleLen.second << endl;
-    cout << "rectangle boundary condtion: " << _RectangleBoundaryCondition << endl;
-    cout << "circle center: (" << _CircleCenter.first << ", " << _CircleCenter.second << ")" << endl;
-    cout << "circle radius: " << _CircleRadius << endl;
-    cout << "circle boundary condtion: " << _CircleBoundaryCondition << endl;
-    cout << "========================================" << endl;
+    cout << "=============================================================" << endl;
+    cout << "n: " << n() << endl;
+    cout << "rectangle length: width = " << rectangle_width() << ", height = " << rectangle_height() << endl;
+    cout << "rectangle boundary condtion: " << endl;
+    cout << "    Left: " << rectangle_boundary_condition()[0] << endl;
+    cout << "    Right: " << rectangle_boundary_condition()[1] << endl;
+    cout << "    Up: " << rectangle_boundary_condition()[2] << endl;
+    cout << "    Down: " << rectangle_boundary_condition()[3] << endl;
+    cout << "circle center: (" << circle_center_x() << ", " << circle_center_y() << ")" << endl;
+    cout << "circle radius: " << circle_radius() << endl;
+    cout << "circle boundary condtion: " << circle_boundary_condition() << endl;
+    cout << "=============================================================" << endl;
 }

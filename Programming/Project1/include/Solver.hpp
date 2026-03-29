@@ -9,19 +9,48 @@
 #define _SOLVER_
 
 #include "Shape.hpp"
+#include "Tensor.hpp"
+#include "MacroDef.hpp"
+#include "Function.hpp"
+#include "ResultAnalysis.hpp"
+#include "TopologyInfo.hpp"
+#include <lapacke.h>
 #include <string>
+#include <iostream>
+#include <ostream>
+#include <iomanip>
 
 using namespace std;
 
+/// @brief Class for solving the problem
 class Solver {
 private:
-    int _n;
-    Rectangle _Rectangle;
-    Circle _Circle;
-    string _RectangleBoundaryCondition, _CircleBoundaryCondition;
+    Matrix_Int _ConnectedMesh, _MeshToNodeOrder, _BoundaryLabel;
+    Tensor<pair<int, int>, 1> _NodeOrderToMesh;
+    Matrix_Double _A;
+    Vector_Double _F, _U;
+    int NodeOrder();
+    void BoundaryLabel(const int n, const Rectangle& rectangle, const Circle& circle, 
+                    const vector<string>& rectangleBoundaryCondition, const string& circleBoundaryCondition);
+    void GenerateMatrix_A(const int NodeCount, const double h);
+    void SolveLinearEquation(const int NodeCount);  
+    void GenerateVector_F(const int NodeCount, const double h, const BivariateFunction& u);
+    // Auiliary function
+    int GetRectangleBoundaryLabel(const int i, const int j, const Rectangle& rectangle, 
+                                    const vector<string>& rectangleBoundaryCondition) const;
+    int GetCircleBoundaryLabel(const int i, const int j, const double h, const Circle& circle, const string& circleBoundaryCondition) const;
 public:
-    Solver(): _n(0), _Rectangle(0, 0, 0, 0), _Circle(0, 0, 0), 
-                _RectangleBoundaryCondition(""), _CircleBoundaryCondition("") {};
+    Solver() = default;
+    Solver(const Matrix_Int& ConnectedMesh): _ConnectedMesh(ConnectedMesh)  {}
+    void Solve(const TopologyInfo& topologyInfo, const BivariateFunction& u);
+    void PrintResultFile(const TopologyInfo& topologyInfo, const BivariateFunction& u) const;
+    const Matrix_Int& ConnectedMesh() const {return _ConnectedMesh;}
+    const Matrix_Int& BoundaryLabel() const {return _BoundaryLabel;}
+    const Matrix_Int& NodeOrderMesh() const {return _MeshToNodeOrder;}
+    const Tensor<pair<int, int>, 1>& NodeOrderToMesh() const {return _NodeOrderToMesh;}
+    const Matrix_Double& A() const {return _A;}
+    const Vector_Double& F() const {return _F;}
+    const Vector_Double& U() const {return _U;}
 };
 
 #endif

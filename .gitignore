@@ -13,6 +13,10 @@ main.pdf
 # cpp
 *.o
 *.d
+build/
+
+# output
+output/
 
 # vscode
 .vscode/

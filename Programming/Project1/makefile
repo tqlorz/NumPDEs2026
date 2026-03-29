@@ -1,6 +1,7 @@
 CXX       = g++
 CXXFLAGS  = -std=c++20 -O2 
 INCLUDES  = -Iinclude
+CFLAGS = -ljsoncpp -llapacke -llapack -lblas -lgfortran -fPIC
 
 # set directories and variables
 SRC_DIR   = src
@@ -11,7 +12,7 @@ OBJS      = $(SRCS:$(SRC_DIR)/%.cpp=$(BUILD_DIR)/%.o)
 DEPS      = $(OBJS:.o=.d)
 
 $(TARGET): $(OBJS) | $(BUILD_DIR)
-	$(CXX) $(CXXFLAGS) $^ -o $@ -ljsoncpp
+	$(CXX) $(CXXFLAGS) $^ -o $@ $(CFLAGS)
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp | $(BUILD_DIR)
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -MMD -MP -c $< -o $@
 # create build directory if it doesn't exist

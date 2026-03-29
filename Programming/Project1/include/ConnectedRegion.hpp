@@ -28,7 +28,7 @@ private:
 public:
     ConnectedRegion();
     ConnectedRegion(const Matrix_Int& Image);
-    Matrix_Int Image() const { return _Image; }
+    const Matrix_Int& Image() const { return _Image; }
     int NumOfConnectedRegion() const { return _NumOfConnectedRegion; }
     void GenerateConnectedImage();
     bool IsConnected() const;

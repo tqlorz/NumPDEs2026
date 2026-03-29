@@ -11,6 +11,8 @@
 #include <vector>
 #include <cmath>
 #include <iostream>
+#include <fstream>
+#include <string>
 
 using namespace std;
 
@@ -34,7 +36,6 @@ public:
     int size() const {return _size;}
     int row() const {return _row;}
     int col() const {return _col;}
-    void resize(const int n);
     T& operator()(const int i) requires (order == 1) {return _data[i];}
     const T& operator()(const int i) const requires (order == 1) {return _data[i];}
     T& operator()(const int i, const int j) requires (order == 2) {return _data[i * _col + j];}
@@ -56,11 +57,11 @@ Tensor<T, order> KroneckerProduct(const Tensor<T, order>& A, const Tensor<T, ord
 template<typename T, int order>
 Tensor<T, 1> MatrixVectorization(const Tensor<T, order>& A);
 
-template<typename T>
-void PrintTensor(const Tensor<T, 1>& A);
+template<typename T, int order>
+void PrintTensor(const Tensor<T, order>& A);
 
-template<typename T>
-void PrintTensor(const Tensor<T, 2>& A);
+template<typename T, int order>
+void PrintTensorFile(const Tensor<T, order>& A, const string &filename);
 
 // ===== detailed implementation of template class =====
 /// @brief Constructor of vector
@@ -105,17 +106,6 @@ void Tensor<T, order>::init(const int row, const int col) requires (order == 2) 
     _col = col;
     _size = _row * _col;
     _data.resize(_size);
-}
-
-/// @brief Resize the tensor
-/// @tparam T
-/// @tparam order
-/// @param n
-template<typename T, int order>
-void Tensor<T, order>::resize(const int n) {
-    _size = n;
-    int dataSize = pow(n, order);
-    _data.resize(dataSize);
 }
 
 // ===== detailed implementation of template function =====
@@ -185,6 +175,37 @@ void PrintTensor(const Tensor<T, 2>& A) {
         }
         cout << endl;
     }
+}
+
+/// @brief Print the vector to a file
+/// @tparam T 
+/// @param A 
+/// @param filename 
+template<typename T>
+void PrintTensorFile(const Tensor<T, 1>& A, const string &filename) {
+    ofstream file(filename);
+    file << "the size of this vector is " << A.size() << endl;
+    for (int i = 0; i < A.size(); i++) {
+        file << A(i) << endl;
+    }
+    file.close();
+}
+
+/// @brief Print the matrix to a file
+/// @tparam T 
+/// @param A 
+/// @param filename 
+template<typename T>
+void PrintTensorFile(const Tensor<T, 2>& A, const string &filename) {
+    ofstream file(filename);
+    file << "the size of this matrix is " << A.row() << " x " << A.col() << endl;
+    for (int i = 0; i < A.row(); i++) {
+        for (int j = 0; j < A.col(); j++) {
+            file << A(i, j) << " ";
+        }
+        file << endl;
+    }
+    file.close();
 }
 
 #endif

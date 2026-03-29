@@ -15,6 +15,7 @@
 #include <string>
 #include <json/json.h>
 #include "MacroDef.hpp"
+#include "TopologyInfo.hpp"
 
 using namespace std;
 
@@ -22,25 +23,28 @@ using namespace std;
 /// @details This class is used to read and check the json file
 class JsonInfo {
 private:
-    int _n;
-    string _RectangleBoundaryCondition, _CircleBoundaryCondition;
-    pair<double, double> _RectangleLen;
-    pair<double, double> _CircleCenter;
-    double _CircleRadius;
-    Json::Value OpenJsonFile(const string &filename) const;
-    void InitFromJsonFile(const Json::Value &root);
+    Json::Value _root;
+    int n() const {return _root["n"].asInt();}
+    double rectangle_width() const {return _root["Rectangle"]["Len"][0].asDouble();}
+    double rectangle_height() const {return _root["Rectangle"]["Len"][1].asDouble();}
+    double circle_center_x() const {return _root["Circle"]["Center"][0].asDouble();}
+    double circle_center_y() const {return _root["Circle"]["Center"][1].asDouble();}
+    double circle_radius() const {return _root["Circle"]["Radius"].asDouble();}
+    const vector<string> rectangle_boundary_condition() const {
+        const Json::Value& boundaryCondition = _root["Rectangle"]["BoundaryCondition"];
+        vector<string> rectangle_boundary_condition(4);
+        rectangle_boundary_condition[0] = boundaryCondition["Left"].asString();
+        rectangle_boundary_condition[1] = boundaryCondition["Right"].asString();
+        rectangle_boundary_condition[2] = boundaryCondition["Up"].asString();
+        rectangle_boundary_condition[3] = boundaryCondition["Down"].asString();
+        return rectangle_boundary_condition;
+    }
+    const string circle_boundary_condition() const {return _root["Circle"]["BoundaryCondition"].asString();}
 public:
-    int n() const {return _n;}
-    string rectangle_boundary_condition() const {return _RectangleBoundaryCondition;}
-    string circle_boundary_condition() const {return _CircleBoundaryCondition;}
-    double rectangle_width() const {return _RectangleLen.first;}
-    double rectangle_height() const {return _RectangleLen.second;}
-    double circle_center_x() const {return _CircleCenter.first;}
-    double circle_center_y() const {return _CircleCenter.second;}
-    double circle_radius() const {return _CircleRadius;}
     JsonInfo() = default;
     JsonInfo(const string &filename);
     void InitJsonInfo(const string &filename);
+    TopologyInfo GetTopologyInfo() const;
     void PrintJsonInfo() const;
 };
 
