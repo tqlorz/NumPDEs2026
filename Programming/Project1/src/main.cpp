@@ -14,7 +14,7 @@ using namespace std;
 class function_1: public BivariateFunction {
 public:
     double operator()(const double x, const double y) const {
-        return exp(y + sin(x));
+        return exp(y+sin(x));
     }
 };
 
@@ -31,31 +31,34 @@ int main(int argc, char *argv[]) {
     Solver solver(ParameterCheck.ConnectedMesh());
     solver.Solve(topologyInfo, u);
     solver.PrintResultFile(topologyInfo, u);
-    // cout << "Connected Mesh:" << endl;
-    // PrintTensor(solver.ConnectedMesh());
-    cout << "Boundary Label:" << endl;
-    PrintTensor(solver.BoundaryLabel());
-    cout << "Node Order Mesh:" << endl;
-    PrintTensor(solver.NodeOrderMesh());
     
-    // cout << "Node Order to Mesh:" << endl;
-    Tensor<pair<int, int>, 1> NodeOrderToMesh = solver.NodeOrderToMesh();
-    // for (int i = 0; i < NodeOrderToMesh.size(); i++) {
-    //     cout << "Node " << i << ": (" << NodeOrderToMesh(i).first << ", " << NodeOrderToMesh(i).second << ")" << endl;
-    // }
+    if (topologyInfo.n() <= 16) {
+        // cout << "Connected Mesh:" << endl;
+        // PrintTensor(solver.ConnectedMesh());
+        cout << "Boundary Label:" << endl;
+        PrintTensor(solver.BoundaryLabel());
+        cout << "Node Order Mesh:" << endl;
+        PrintTensor(solver.NodeOrderMesh());
+        
+        // cout << "Node Order to Mesh:" << endl;
+        Tensor<pair<int, int>, 1> NodeOrderToMesh = solver.NodeOrderToMesh();
+        // for (int i = 0; i < NodeOrderToMesh.size(); i++) {
+        //     cout << "Node " << i << ": (" << NodeOrderToMesh(i).first << ", " << NodeOrderToMesh(i).second << ")" << endl;
+        // }
 
-    
-    // cout << "Vector F:" << endl;
-    // for (int i = 0; i < solver.F().size(); i++) {
-    //     cout << NodeOrderToMesh(i).first << " " << NodeOrderToMesh(i).second << ": " << solver.F()(i) << endl;  
-    // }
-    // cout << endl;
+        
+        // cout << "Vector F:" << endl;
+        // for (int i = 0; i < solver.F().size(); i++) {
+        //     cout << NodeOrderToMesh(i).first << " " << NodeOrderToMesh(i).second << ": " << solver.F()(i) << endl;  
+        // }
+        // cout << endl;
 
-    cout << "Vector U:" << endl;
-    for (int i = 0; i < solver.U().size(); i++) {
-        cout << NodeOrderToMesh(i).first << " " << NodeOrderToMesh(i).second << ": " << solver.U()(i) << endl;  
+        cout << "Vector U:" << endl;
+        for (int i = 0; i < solver.U().size(); i++) {
+            cout << NodeOrderToMesh(i).first << " " << NodeOrderToMesh(i).second << ": " << solver.U()(i) << endl;  
+        }
+        cout << endl;
     }
-    cout << endl;
 
     return 0;
 }

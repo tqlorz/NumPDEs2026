@@ -1,12 +1,12 @@
 {
-    "n" : 8,
+    "n" : 32,
     "Rectangle" : {
         "Len" : [1.0, 1.0],
         "BoundaryCondition" : {
             "Left" : "Dirichlet",
             "Right" : "Dirichlet",
             "Up" : "Dirichlet",
-            "Down" : "Dirichlet"
+            "Down" : "Neumann"
         }
     },
     "Circle" : {

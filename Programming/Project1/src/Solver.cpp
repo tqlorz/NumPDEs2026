@@ -63,6 +63,7 @@ void Solver::BoundaryLabel(const int n, const Rectangle& rectangle, const Circle
             } else if (CenterData == BOUNDARY_POINT) {
                 _BoundaryLabel(i, j) = NOT_IN_CALCULATION;
             }
+            // Label the boundary points
             if (_BoundaryLabel(i, j) == NOT_IN_CALCULATION) {
                 _BoundaryLabel(i, j) = GetRectangleBoundaryLabel(i, j, rectangle, rectangleBoundaryCondition);
             } else if (_BoundaryLabel(i, j) == NOT_BOUNDARY) {
@@ -138,7 +139,6 @@ void Solver::GenerateMatrix_A(const int NodeCount, const double h) {
                 _A(k, k) = 4 / SQUARE(h);
                 _A(k, _MeshToNodeOrder(i - 1, j)) = -1 / SQUARE(h);
                 _A(k, _MeshToNodeOrder(i + 1, j)) = -1 / SQUARE(h);
-            
                 _A(k, _MeshToNodeOrder(i, j - 1)) = -1 / SQUARE(h);
                 _A(k, _MeshToNodeOrder(i, j + 1)) = -1 / SQUARE(h);
                 break;
@@ -147,7 +147,30 @@ void Solver::GenerateMatrix_A(const int NodeCount, const double h) {
                 _A(k, k) = 1;
                 break;
             }
-            case RECTANGLE_BOUNDARY_NEUMANN: break;
+            case RECTANGLE_BOUNDARY_NEUMANN: {
+                if (i == 0) {
+                    _A(k, k) = 4 / SQUARE(h);
+                    _A(k, _MeshToNodeOrder(1, j)) = -2 / SQUARE(h);
+                    if (j - 1 > 0) _A(k, _MeshToNodeOrder(0, j - 1)) = -1 / SQUARE(h);
+                    if (j + 1 < _ConnectedMesh.col() - 1) _A(k, _MeshToNodeOrder(0, j + 1)) = -1 / SQUARE(h);
+                } else if (i == _ConnectedMesh.row() - 1) {
+                    _A(k, k) = 4 / SQUARE(h);
+                    _A(k, _MeshToNodeOrder(_ConnectedMesh.row() - 2, j)) = -2 / SQUARE(h);
+                    if (j - 1 > 0) _A(k, _MeshToNodeOrder(_ConnectedMesh.row() - 1, j - 1)) = -1 / SQUARE(h);
+                    if (j + 1 < _ConnectedMesh.col() - 1) _A(k, _MeshToNodeOrder(_ConnectedMesh.row() - 1, j + 1)) = -1 / SQUARE(h);
+                } else if (j == 0) {
+                    _A(k, k) = 4 / SQUARE(h);
+                    _A(k, _MeshToNodeOrder(i, 1)) = -2 / SQUARE(h);
+                    if (i - 1 > 0) _A(k, _MeshToNodeOrder(i - 1, 0)) = -1 / SQUARE(h);
+                    if (i + 1 < _ConnectedMesh.row() - 1) _A(k, _MeshToNodeOrder(i + 1, 0)) = -1 / SQUARE(h);
+                } else if (j == _ConnectedMesh.col() - 1) {
+                    _A(k, k) = 4 / SQUARE(h);
+                    _A(k, _MeshToNodeOrder(i, _ConnectedMesh.col() - 2)) = -2 / SQUARE(h);
+                    if (i - 1 > 0) _A(k, _MeshToNodeOrder(i - 1, _ConnectedMesh.col() - 1)) = -1 / SQUARE(h);
+                    if (i + 1 < _ConnectedMesh.row() - 1) _A(k, _MeshToNodeOrder(i + 1, _ConnectedMesh.col() - 1)) = -1 / SQUARE(h);
+                }
+                break;
+            }
             case CIRCLE_BOUNDARY_DIRICHLET: break;
             case CIRCLE_BOUNDARY_NEUMANN: break;
             case NOT_IN_CALCULATION: break;
@@ -174,8 +197,30 @@ void Solver::GenerateVector_F(const int NodeCount, const double h, const Bivaria
                 _F(k) = u(i * h, j * h);
                 break;
             }
-            case RECTANGLE_BOUNDARY_NEUMANN: break;
-            case CIRCLE_BOUNDARY_DIRICHLET: break;
+            case RECTANGLE_BOUNDARY_NEUMANN: {
+                if (i == 0) {
+                    _F(k) = (-1) * u.laplacian(0, j * h) + (2 / h) * (-u.partial_derivative_x(0, j * h));
+                    if (j - 1 == 0) _F(k) += u(0, 0) / SQUARE(h);
+                    if (j + 1 == _ConnectedMesh.col() - 1) _F(k) += u(0, (_ConnectedMesh.col() - 1) * h) / SQUARE(h);
+                } else if (i == _ConnectedMesh.row() - 1) {
+                    _F(k) = (-1) * u.laplacian((_ConnectedMesh.row() - 1) * h, j * h) + (2 / h) * u.partial_derivative_x((_ConnectedMesh.row() - 1) * h, j * h);
+                    if (j - 1 == 0) _F(k) += u((_ConnectedMesh.row() - 1) * h, 0) / SQUARE(h);
+                    if (j + 1 == _ConnectedMesh.col() - 1) _F(k) += u((_ConnectedMesh.row() - 1) * h, (_ConnectedMesh.col() - 1) * h) / SQUARE(h);
+                } else if (j == 0) {
+                    _F(k) = (-1) * u.laplacian(i * h, 0) + (2 / h) * (-u.partial_derivative_y(i * h, 0));
+                    if (i - 1 == 0) _F(k) += u(0, 0) / SQUARE(h);
+                    if (i + 1 == _ConnectedMesh.row() - 1) _F(k) += u((_ConnectedMesh.row() - 1) * h, 0) / SQUARE(h);
+                } else if (j == _ConnectedMesh.col() - 1) {
+                    _F(k) = (-1) * u.laplacian(i * h, (_ConnectedMesh.col() - 1) * h) + (2 / h) * u.partial_derivative_y(i * h, (_ConnectedMesh.col() - 1) * h);
+                    if (i - 1 == 0) _F(k) += u(0, (_ConnectedMesh.col() - 1) * h) / SQUARE(h);
+                    if (i + 1 == _ConnectedMesh.row() - 1) _F(k) += u((_ConnectedMesh.row() - 1) * h, (_ConnectedMesh.col() - 1) * h) / SQUARE(h);
+                }
+                break;
+            }
+            case CIRCLE_BOUNDARY_DIRICHLET: {
+                _F(k) = u(i * h, j * h);
+                break;
+            }
             case CIRCLE_BOUNDARY_NEUMANN: break;
             case NOT_IN_CALCULATION: break;
             default: break;
