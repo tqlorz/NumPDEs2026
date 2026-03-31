@@ -14,7 +14,9 @@
 #include "Function.hpp"
 #include "ResultAnalysis.hpp"
 #include "TopologyInfo.hpp"
+#include "Interpolation.hpp"
 #include <lapacke.h>
+#include <cmath>
 #include <string>
 #include <iostream>
 #include <ostream>
@@ -32,13 +34,20 @@ private:
     int NodeOrder();
     void BoundaryLabel(const int n, const Rectangle& rectangle, const Circle& circle, 
                     const vector<string>& rectangleBoundaryCondition, const string& circleBoundaryCondition);
-    void GenerateMatrix_A(const int NodeCount, const double h);
+    void GenerateMatrix_A(const int NodeCount, const double h, const Circle& circle);
+    void GenerateVector_F(const int NodeCount, const double h, const BivariateFunction& u, const Circle& circle);
     void SolveLinearEquation(const int NodeCount);  
-    void GenerateVector_F(const int NodeCount, const double h, const BivariateFunction& u);
     // Auiliary function
     int GetRectangleBoundaryLabel(const int i, const int j, const Rectangle& rectangle, 
                                     const vector<string>& rectangleBoundaryCondition) const;
     int GetCircleBoundaryLabel(const int i, const int j, const double h, const Circle& circle, const string& circleBoundaryCondition) const;
+    // Subfunctions for generating matrix A and vector F
+    void GenerateMatrix_A_RectangleNeumann(const int k, const int i, const int j, const double h);
+    void GenerateMatrix_A_CircleDirichlet(const int k, const int i, const int j, const double h, const Circle& circle);
+    void GenerateMatrix_A_CircleNeumann(const int k, const int i, const int j, const double h, const Circle& circle);
+    void GenerateVector_F_RectangleNeumann(const int k, const int i, const int j, const double h, const BivariateFunction& u);
+    void GenerateVector_F_CircleNeumann(const int k, const int i, const int j, const double h, const Circle& circle, const BivariateFunction& u);
+    void GenerateVector_F_CircleDirichlet(const int k, const int i, const int j, const double h, const Circle& circle, const BivariateFunction& u);
 public:
     Solver() = default;
     Solver(const Matrix_Int& ConnectedMesh): _ConnectedMesh(ConnectedMesh)  {}

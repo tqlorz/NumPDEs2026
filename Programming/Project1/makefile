@@ -1,5 +1,5 @@
 CXX       = g++
-CXXFLAGS  = -std=c++20 -O2 
+CXXFLAGS  = -std=c++20 -g
 INCLUDES  = -Iinclude
 CFLAGS = -ljsoncpp -llapacke -llapack -lblas -lgfortran -fPIC
 
@@ -34,8 +34,10 @@ run: $(TARGET)
 	./$(TARGET)
 plot: $(OUTPUT_DATA_DIR) $(OUTPUT_FIG_DIR)
 	python3 python/plot.py $(OUTPUT_DATA_DIR)/*.txt
+gdb: $(TARGET)
+	gdb $(TARGET)
 clean:
 	rm -f $(BUILD_DIR)/*.d $(BUILD_DIR)/*.o
 	rm -f $(TARGET)	
 
-.PHONY: all clean run plot
+.PHONY: all clean run plot gdb

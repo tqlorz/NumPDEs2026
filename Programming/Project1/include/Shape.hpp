@@ -11,6 +11,8 @@
 #include <iostream>
 #include <cmath>
 
+using namespace std;
+
 class Shape {
 public:
     virtual double area() const = 0;
@@ -45,5 +47,31 @@ public:
     double width() const { return _Width; }
     double height() const { return _Height; }
 };
+
+class Triangle : public Shape {
+private:
+    double _Vertex1_x, _Vertex1_y;
+    double _Vertex2_x, _Vertex2_y;
+    double _Vertex3_x, _Vertex3_y;
+public:
+    Triangle(const double x1, const double y1, const double x2, const double y2, const double x3, const double y3) : 
+    _Vertex1_x(x1), _Vertex1_y(y1), _Vertex2_x(x2), _Vertex2_y(y2), _Vertex3_x(x3), _Vertex3_y(y3) {}   
+    double area() const {
+        return 0.5 * ((_Vertex2_x - _Vertex1_x) * (_Vertex3_y - _Vertex1_y) 
+                    - (_Vertex3_x - _Vertex1_x) * (_Vertex2_y - _Vertex1_y));
+    }
+    double perimeter() const {
+        double side1 = sqrt(pow(_Vertex2_x - _Vertex1_x, 2) + pow(_Vertex2_y - _Vertex1_y, 2));
+        double side2 = sqrt(pow(_Vertex3_x - _Vertex2_x, 2) + pow(_Vertex3_y - _Vertex2_y, 2));
+        double side3 = sqrt(pow(_Vertex1_x - _Vertex3_x, 2) + pow(_Vertex1_y - _Vertex3_y, 2));
+        return side1 + side2 + side3;
+    }
+    double vertex1_x() const { return _Vertex1_x;}
+    double vertex1_y() const { return _Vertex1_y;}
+    double vertex2_x() const { return _Vertex2_x;}
+    double vertex2_y() const { return _Vertex2_y;}
+    double vertex3_x() const { return _Vertex3_x;}
+    double vertex3_y() const { return _Vertex3_y;}
+};  
 
 #endif

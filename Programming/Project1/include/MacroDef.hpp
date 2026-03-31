@@ -26,10 +26,14 @@ using namespace std;
 
 // Define some simplify calculation
 #define SQUARE(x) ((x) * (x))
+#define NORM_2D(x, y) (sqrt(SQUARE(x) + SQUARE(y)))
 #define DISTANCE_2D(x1, y1, x2, y2) (sqrt(SQUARE((x2) - (x1)) + SQUARE((y2) - (y1))))
 #define IS_IN_CIRCLE(x, y, x_0, y_0, r) (SQUARE((x) - (x_0)) + SQUARE((y) - (y_0)) <= SQUARE(r))
-// #define REGULAR_GRID_FIVE_POINT_DIFFERENCE(C, R, U, D, L, h) \
-//         ((4 * (C) - (R) - (U) - (D) - (L)) / SQUARE((h)))
-// #define IRREGULAR_GRID_FIVE_POINT_DIFFERENCE(C, R, U, D, L, h, alpha, theta)
+#define X_ON_CIRCLE_MINUS(y, x_0, y_0, r) ((x_0) - sqrt(SQUARE(r) - SQUARE((y) - (y_0))))
+#define X_ON_CIRCLE_PLUS(y, x_0, y_0, r) ((x_0) + sqrt(SQUARE(r) - SQUARE((y) - (y_0))))
+#define Y_ON_CIRCLE_MINUS(x, x_0, y_0, r) ((y_0) - sqrt(SQUARE(r) - SQUARE((x) - (x_0))))
+#define Y_ON_CIRCLE_PLUS(x, x_0, y_0, r) ((y_0) + sqrt(SQUARE(r) - SQUARE((x) - (x_0))))
+#define MIN(a, b) ((a) < (b) ? (a) : (b))
+#define MAX(a, b) ((a) > (b) ? (a) : (b))
 
 #endif

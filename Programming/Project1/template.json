@@ -1,17 +1,17 @@
 {
-    "n" : 32,
+    "n" : 64,
     "Rectangle" : {
         "Len" : [1.0, 1.0],
         "BoundaryCondition" : {
             "Left" : "Dirichlet",
             "Right" : "Dirichlet",
             "Up" : "Dirichlet",
-            "Down" : "Neumann"
+            "Down" : "Dirichlet"
         }
     },
     "Circle" : {
         "Center" : [0.5, 0.5],
-        "Radius" : 0,
+        "Radius" : 0.3,
         "BoundaryCondition" : "Dirichlet"
     }
 }

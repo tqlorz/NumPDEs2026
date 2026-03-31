@@ -15,6 +15,7 @@ class function_1: public BivariateFunction {
 public:
     double operator()(const double x, const double y) const {
         return exp(y+sin(x));
+        // return x*(1-x)*y*(1-y);
     }
 };
 
@@ -53,12 +54,25 @@ int main(int argc, char *argv[]) {
         // }
         // cout << endl;
 
-        cout << "Vector U:" << endl;
-        for (int i = 0; i < solver.U().size(); i++) {
-            cout << NodeOrderToMesh(i).first << " " << NodeOrderToMesh(i).second << ": " << solver.U()(i) << endl;  
-        }
-        cout << endl;
+        // cout << "Vector U:" << endl;
+        // for (int i = 0; i < solver.U().size(); i++) {
+        //     cout << NodeOrderToMesh(i).first << " " << NodeOrderToMesh(i).second << ": " << solver.U()(i) << endl;  
+        // }
+        // cout << endl;
     }
+
+    // Rectangle test = Rectangle(0, 0, 1, 1);
+    // vector<double> record = RectangleInterpolation(0.2,0.3, test);
+    // for (int i = 0; i < record.size(); i++) {
+    //     cout << "Coefficient " << i << ": " << record[i] << endl;
+    // }
+
+    // Triangle test_triangle = Triangle(0, 0, 1, 0, 0, 1);
+    // vector<double> record_triangle = TriangleInterpolation(0.6, 0.7, test_triangle);
+    // for (int i = 0; i < record_triangle.size(); i++) {
+    //     cout << "Coefficient " << i << ": " << record_triangle[i] << endl;
+    // }
+    
 
     return 0;
 }
