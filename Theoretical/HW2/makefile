@@ -1,24 +1,28 @@
-OBJECT = $(wildcard *.tex)
-PYTHON = $(wildcard python/*.py)
-FIGURE = $(patsubst python/%.py, figure/%.pdf, ${PYTHON})
+FIG_DIR = figure
+PY_DIR = python
+TARGET = main.pdf
+OBJS = $(wildcard *.tex)
+FIGS = $(wildcard $(FIG_DIR)/*.pdf)
+PY = $(wildcard $(PY_DIR)/*.py)
+FIGS = $(patsubst $(PY_DIR)/%.py, $(FIG_DIR)/%.pdf, ${PY})
 
-main.pdf: ${OBJECT} ${FIGURE}
+${TARGET}: ${OBJS} ${FIGS}
 	make doc
 
-$(FIGURE): figure/%.pdf: python/%.py
+$(FIGS): $(FIG_DIR)/%.pdf: $(PY_DIR)/%.py
 	@python3 $<
 
 .PHONY: doc all clean
 
 doc:
-	@xelatex -synctex=1 ${OBJECT}
+	@xelatex -synctex=1 ${OBJS}
 	make clean
 
 all: 
-	@xelatex -synctex=1 ${OBJECT}
+	@xelatex -synctex=1 ${OBJS}
 	@bibtex main.aux
-	@xelatex -synctex=1 ${OBJECT}
-	@xelatex -synctex=1 ${OBJECT}
+	@xelatex -synctex=1 ${OBJS}
+	@xelatex -synctex=1 ${OBJS}
 	make clean
 
 clean:

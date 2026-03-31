@@ -28,7 +28,7 @@
 \maketitle
 
 % ============================================
-\section*{Exercise 11.5}
+\section*{Exercise 11.6}
 
 \par 将不等式左边具体写出：
 \begin{equation}
@@ -56,20 +56,6 @@
 \end{equation}
 \par 由 $\lVert \bm{e}\rVert_2\leq \lVert A^{-1}\rVert_2\lVert A\bm{e}\rVert_2$
 和 $\lVert A\rVert_2\lVert \bm{x}\rVert_2\geq \lVert A\bm{x}\rVert_2$ 可得不等式右边成立。
-
-\section*{Exercise 11.8}
-
-\par 对于一维FDM差分矩阵 $A$，
-其特征值为 $\lambda_k(A) = \dfrac{4}{h^2}\sin^2\dfrac{k\pi}{2n}$，其中 $k=1,2,\cdots,n-1$。
-对于二范数，其值为 $\lVert A\rVert_2 = \displaystyle\max_{1\leq k\leq n-1}|\lambda_k(A)|$。
-因此 $\text{cond}(A)$ 为
-\begin{equation}
-    \text{cond}(A) = \frac{\displaystyle\max_{1\leq k\leq n-1}|\lambda_k(A)|}{\displaystyle\min_{1\leq k\leq n-1}|\lambda_k(A)|}
-    = \frac{\sin^2\dfrac{(n-1)\pi}{2n}}{\sin^2\dfrac{\pi}{2n}}
-    = \cot^2\dfrac{\pi}{2n}
-\end{equation}
-\par 当 $n=8$ 时，$\text{cond}(A) \approx 25.2741$；
-当 $n=1024$ 时，$\text{cond}(A) \approx 4.2497\times 10^5$。
 
 \section*{Exercise 11.11}
 
