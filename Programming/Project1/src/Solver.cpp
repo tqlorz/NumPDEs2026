@@ -19,6 +19,10 @@ void Solver::Solve(const TopologyInfo& topologyInfo, const BivariateFunction& u)
     SolveLinearEquation(NodeCount);
     cout << "Problem solved!" << endl;
     cout << "=============================================================" << endl;
+    PrintError_L1norm(h, u);
+    PrintError_L2norm(h, u);
+    PrintError_Linfnorm(h, u);
+    cout << "=============================================================" << endl;
 }
 
 /// @brief Label the boundary points for the finite difference method
@@ -38,9 +42,11 @@ void Solver::BoundaryLabel(const int n, const Rectangle& rectangle, const Circle
                 _BoundaryLabel(i, j) = NOT_IN_CALCULATION;
             }
             // Label the boundary points
-            if (_BoundaryLabel(i, j) == NOT_IN_CALCULATION) {
+            if (_BoundaryLabel(i, j) == NOT_IN_CALCULATION 
+                && IS_IN_CIRCLE(i * h, j * h, circle.center_x(), circle.center_y(), circle.radius()) == false) {
                 _BoundaryLabel(i, j) = GetRectangleBoundaryLabel(i, j, rectangle, rectangleBoundaryCondition);
-            } else if (_BoundaryLabel(i, j) == NOT_BOUNDARY) {
+            } 
+            if (_BoundaryLabel(i, j) == NOT_BOUNDARY) {
                 _BoundaryLabel(i, j) = GetCircleBoundaryLabel(i, j, h, circle, circleBoundaryCondition);
             }
         }
@@ -208,23 +214,23 @@ void Solver::GenerateMatrix_A_RectangleNeumann(const int k, const int i, const i
     if (i == 0) {
         _A(k, k) = 4 / SQUARE(h);
         _A(k, _MeshToNodeOrder(1, j)) = -2 / SQUARE(h);
-        if (j - 1 > 0) _A(k, _MeshToNodeOrder(0, j - 1)) = -1 / SQUARE(h);
-        if (j + 1 < _ConnectedMesh.col() - 1) _A(k, _MeshToNodeOrder(0, j + 1)) = -1 / SQUARE(h);
+        if (_BoundaryLabel(0, j - 1) != NOT_IN_CALCULATION) _A(k, _MeshToNodeOrder(0, j - 1)) = -1 / SQUARE(h);
+        if (_BoundaryLabel(0, j + 1) != NOT_IN_CALCULATION) _A(k, _MeshToNodeOrder(0, j + 1)) = -1 / SQUARE(h);
     } else if (i == _ConnectedMesh.row() - 1) {
         _A(k, k) = 4 / SQUARE(h);
         _A(k, _MeshToNodeOrder(_ConnectedMesh.row() - 2, j)) = -2 / SQUARE(h);
-        if (j - 1 > 0) _A(k, _MeshToNodeOrder(_ConnectedMesh.row() - 1, j - 1)) = -1 / SQUARE(h);
-        if (j + 1 < _ConnectedMesh.col() - 1) _A(k, _MeshToNodeOrder(_ConnectedMesh.row() - 1, j + 1)) = -1 / SQUARE(h);
+        if (_BoundaryLabel(_ConnectedMesh.row() - 1, j - 1) != NOT_IN_CALCULATION) _A(k, _MeshToNodeOrder(_ConnectedMesh.row() - 1, j - 1)) = -1 / SQUARE(h);
+        if (_BoundaryLabel(_ConnectedMesh.row() - 1, j + 1) != NOT_IN_CALCULATION) _A(k, _MeshToNodeOrder(_ConnectedMesh.row() - 1, j + 1)) = -1 / SQUARE(h);
     } else if (j == 0) {
         _A(k, k) = 4 / SQUARE(h);
         _A(k, _MeshToNodeOrder(i, 1)) = -2 / SQUARE(h);
-        if (i - 1 > 0) _A(k, _MeshToNodeOrder(i - 1, 0)) = -1 / SQUARE(h);
-        if (i + 1 < _ConnectedMesh.row() - 1) _A(k, _MeshToNodeOrder(i + 1, 0)) = -1 / SQUARE(h);
+        if (_BoundaryLabel(i - 1, 0) != NOT_IN_CALCULATION) _A(k, _MeshToNodeOrder(i - 1, 0)) = -1 / SQUARE(h);
+        if (_BoundaryLabel(i + 1, 0) != NOT_IN_CALCULATION) _A(k, _MeshToNodeOrder(i + 1, 0)) = -1 / SQUARE(h);
     } else if (j == _ConnectedMesh.col() - 1) {
         _A(k, k) = 4 / SQUARE(h);
         _A(k, _MeshToNodeOrder(i, _ConnectedMesh.col() - 2)) = -2 / SQUARE(h);
-        if (i - 1 > 0) _A(k, _MeshToNodeOrder(i - 1, _ConnectedMesh.col() - 1)) = -1 / SQUARE(h);
-        if (i + 1 < _ConnectedMesh.row() - 1) _A(k, _MeshToNodeOrder(i + 1, _ConnectedMesh.col() - 1)) = -1 / SQUARE(h);
+        if (_BoundaryLabel(i - 1, _ConnectedMesh.col() - 1) != NOT_IN_CALCULATION) _A(k, _MeshToNodeOrder(i - 1, _ConnectedMesh.col() - 1)) = -1 / SQUARE(h);
+        if (_BoundaryLabel(i + 1, _ConnectedMesh.col() - 1) != NOT_IN_CALCULATION) _A(k, _MeshToNodeOrder(i + 1, _ConnectedMesh.col() - 1)) = -1 / SQUARE(h);
     }
 }
 
@@ -282,7 +288,7 @@ void Solver::GenerateMatrix_A_CircleNeumann(const int k, const int i, const int 
     if (IsInCircle_Right == false) _A(k, _MeshToNodeOrder(i + 1, j)) = -1 / SQUARE(h);
     if (IsInCircle_Down == false) _A(k, _MeshToNodeOrder(i, j - 1)) = -1 / SQUARE(h);
     if (IsInCircle_Up == false) _A(k, _MeshToNodeOrder(i, j + 1)) = -1 / SQUARE(h);
-    
+
     if (IsInCircle_Left == true) {
         double d = circle.radius() - DISTANCE_2D((i - 1) * h, j * h, circle.center_x(), circle.center_y());
         pair<double, double> NormalVector = make_pair((i - 1) * h - circle.center_x(), j * h - circle.center_y());
@@ -290,19 +296,19 @@ void Solver::GenerateMatrix_A_CircleNeumann(const int k, const int i, const int 
                                                         NormalVector.second / NORM_2D(NormalVector.first, NormalVector.second));
         pair<double, double> PointOnCircle = make_pair((i - 1) * h + UnitNormalVector.first * d, 
                                                         j * h + UnitNormalVector.second * d);
-        double distance = h / MAX(abs(NormalVector.first), abs(NormalVector.second));
+        double distance = h / MAX(abs(UnitNormalVector.first), abs(UnitNormalVector.second));
         pair<double, double> PointOnExtendedLine = make_pair((i-1) * h + UnitNormalVector.first * distance, 
                                                         j * h + UnitNormalVector.second * distance);
         if (abs(NormalVector.first) >= abs(NormalVector.second)) {
             int index_x = round(PointOnExtendedLine.first / h);
-            int index_y_up = ceil(PointOnExtendedLine.second / h);
             int index_y_down = floor(PointOnExtendedLine.second / h);
+            int index_y_up = index_y_down + 1;
             _A(k, _MeshToNodeOrder(index_x, index_y_down)) += -(index_y_up - PointOnExtendedLine.second / h) / SQUARE(h);
             _A(k, _MeshToNodeOrder(index_x, index_y_up)) += -(PointOnExtendedLine.second / h - index_y_down) / SQUARE(h);
         } else {
             int index_y = round(PointOnExtendedLine.second / h);
             int index_x_left = floor(PointOnExtendedLine.first / h);
-            int index_x_right = ceil(PointOnExtendedLine.first / h);
+            int index_x_right = index_x_left + 1;
             _A(k, _MeshToNodeOrder(index_x_left, index_y)) += -(index_x_right - PointOnExtendedLine.first / h) / SQUARE(h);
             _A(k, _MeshToNodeOrder(index_x_right, index_y)) += -(PointOnExtendedLine.first / h - index_x_left) / SQUARE(h);
         }
@@ -314,19 +320,19 @@ void Solver::GenerateMatrix_A_CircleNeumann(const int k, const int i, const int 
                                                         NormalVector.second / NORM_2D(NormalVector.first, NormalVector.second));
         pair<double, double> PointOnCircle = make_pair((i + 1) * h + UnitNormalVector.first * d, 
                                                         j * h + UnitNormalVector.second * d);
-        double distance = h / MAX(abs(NormalVector.first), abs(NormalVector.second));
+        double distance = h / MAX(abs(UnitNormalVector.first), abs(UnitNormalVector.second));
         pair<double, double> PointOnExtendedLine = make_pair((i+1) * h + UnitNormalVector.first * distance, 
                                                         j * h + UnitNormalVector.second * distance);
         if (abs(NormalVector.first) >= abs(NormalVector.second)) {
             int index_x = round(PointOnExtendedLine.first / h);
-            int index_y_up = ceil(PointOnExtendedLine.second / h);
             int index_y_down = floor(PointOnExtendedLine.second / h);
+            int index_y_up = index_y_down + 1;
             _A(k, _MeshToNodeOrder(index_x, index_y_down)) += -(index_y_up - PointOnExtendedLine.second / h) / SQUARE(h);
             _A(k, _MeshToNodeOrder(index_x, index_y_up)) += -(PointOnExtendedLine.second / h - index_y_down) / SQUARE(h);
         } else {
             int index_y = round(PointOnExtendedLine.second / h);
             int index_x_left = floor(PointOnExtendedLine.first / h);
-            int index_x_right = ceil(PointOnExtendedLine.first / h);
+            int index_x_right = index_x_left + 1;
             _A(k, _MeshToNodeOrder(index_x_left, index_y)) += -(index_x_right - PointOnExtendedLine.first / h) / SQUARE(h);
             _A(k, _MeshToNodeOrder(index_x_right, index_y)) += -(PointOnExtendedLine.first / h - index_x_left) / SQUARE(h);
         }
@@ -338,19 +344,19 @@ void Solver::GenerateMatrix_A_CircleNeumann(const int k, const int i, const int 
                                                         NormalVector.second / NORM_2D(NormalVector.first, NormalVector.second));
         pair<double, double> PointOnCircle = make_pair(i * h + UnitNormalVector.first * d, 
                                                         (j - 1) * h + UnitNormalVector.second * d);
-        double distance = h / MAX(abs(NormalVector.first), abs(NormalVector.second));
+        double distance = h / MAX(abs(UnitNormalVector.first), abs(UnitNormalVector.second));
         pair<double, double> PointOnExtendedLine = make_pair(i * h + UnitNormalVector.first * distance, 
                                                         (j - 1) * h + UnitNormalVector.second * distance);
         if (abs(NormalVector.first) >= abs(NormalVector.second)) {
             int index_x = round(PointOnExtendedLine.first / h);
-            int index_y_up = ceil(PointOnExtendedLine.second / h);
             int index_y_down = floor(PointOnExtendedLine.second / h);
+            int index_y_up = index_y_down + 1;
             _A(k, _MeshToNodeOrder(index_x, index_y_down)) += -(index_y_up - PointOnExtendedLine.second / h) / SQUARE(h);
             _A(k, _MeshToNodeOrder(index_x, index_y_up)) += -(PointOnExtendedLine.second / h - index_y_down) / SQUARE(h);
         } else {
             int index_y = round(PointOnExtendedLine.second / h);
             int index_x_left = floor(PointOnExtendedLine.first / h);
-            int index_x_right = ceil(PointOnExtendedLine.first / h);
+            int index_x_right = index_x_left + 1;
             _A(k, _MeshToNodeOrder(index_x_left, index_y)) += -(index_x_right - PointOnExtendedLine.first / h) / SQUARE(h);
             _A(k, _MeshToNodeOrder(index_x_right, index_y)) += -(PointOnExtendedLine.first / h - index_x_left) / SQUARE(h);
         }
@@ -362,19 +368,19 @@ void Solver::GenerateMatrix_A_CircleNeumann(const int k, const int i, const int 
                                                         NormalVector.second / NORM_2D(NormalVector.first, NormalVector.second));
         pair<double, double> PointOnCircle = make_pair(i * h + UnitNormalVector.first * d, 
                                                         (j + 1) * h + UnitNormalVector.second * d);
-        double distance = h / MAX(abs(NormalVector.first), abs(NormalVector.second));
+        double distance = h / MAX(abs(UnitNormalVector.first), abs(UnitNormalVector.second));
         pair<double, double> PointOnExtendedLine = make_pair(i * h + UnitNormalVector.first * distance, 
                                                         (j + 1) * h + UnitNormalVector.second * distance);
         if (abs(NormalVector.first) >= abs(NormalVector.second)) {
             int index_x = round(PointOnExtendedLine.first / h);
-            int index_y_up = ceil(PointOnExtendedLine.second / h);
             int index_y_down = floor(PointOnExtendedLine.second / h);
+            int index_y_up = index_y_down + 1;
             _A(k, _MeshToNodeOrder(index_x, index_y_down)) += -(index_y_up - PointOnExtendedLine.second / h) / SQUARE(h);
             _A(k, _MeshToNodeOrder(index_x, index_y_up)) += -(PointOnExtendedLine.second / h - index_y_down) / SQUARE(h);
         } else {
             int index_y = round(PointOnExtendedLine.second / h);
             int index_x_left = floor(PointOnExtendedLine.first / h);
-            int index_x_right = ceil(PointOnExtendedLine.first / h);
+            int index_x_right = index_x_left + 1;
             _A(k, _MeshToNodeOrder(index_x_left, index_y)) += -(index_x_right - PointOnExtendedLine.first / h) / SQUARE(h);
             _A(k, _MeshToNodeOrder(index_x_right, index_y)) += -(PointOnExtendedLine.first / h - index_x_left) / SQUARE(h);
         }
@@ -391,20 +397,20 @@ void Solver::GenerateVector_F_RectangleNeumann(const int k, const int i, const i
                                             const BivariateFunction& u) {
     if (i == 0) {
         _F(k) = (-1) * u.laplacian(0, j * h) + (2 / h) * (-u.partial_derivative_x(0, j * h));
-        if (j - 1 == 0) _F(k) += u(0, 0) / SQUARE(h);
-        if (j + 1 == _ConnectedMesh.col() - 1) _F(k) += u(0, (_ConnectedMesh.col() - 1) * h) / SQUARE(h);
+        if (_BoundaryLabel(0, j - 1) == NOT_IN_CALCULATION) _F(k) += u(0, (j - 1) * h) / SQUARE(h);
+        if (_BoundaryLabel(0, j + 1) == NOT_IN_CALCULATION) _F(k) += u(0, (j + 1) * h) / SQUARE(h);
     } else if (i == _ConnectedMesh.row() - 1) {
         _F(k) = (-1) * u.laplacian((_ConnectedMesh.row() - 1) * h, j * h) + (2 / h) * u.partial_derivative_x((_ConnectedMesh.row() - 1) * h, j * h);
-        if (j - 1 == 0) _F(k) += u((_ConnectedMesh.row() - 1) * h, 0) / SQUARE(h);
-        if (j + 1 == _ConnectedMesh.col() - 1) _F(k) += u((_ConnectedMesh.row() - 1) * h, (_ConnectedMesh.col() - 1) * h) / SQUARE(h);
+        if (_BoundaryLabel(_ConnectedMesh.row() - 1, j - 1) == NOT_IN_CALCULATION) _F(k) += u((_ConnectedMesh.row() - 1) * h, (j - 1) * h) / SQUARE(h);
+        if (_BoundaryLabel(_ConnectedMesh.row() - 1, j + 1) == NOT_IN_CALCULATION) _F(k) += u((_ConnectedMesh.row() - 1) * h, (j + 1) * h) / SQUARE(h);
     } else if (j == 0) {
         _F(k) = (-1) * u.laplacian(i * h, 0) + (2 / h) * (-u.partial_derivative_y(i * h, 0));
-        if (i - 1 == 0) _F(k) += u(0, 0) / SQUARE(h);
-        if (i + 1 == _ConnectedMesh.row() - 1) _F(k) += u((_ConnectedMesh.row() - 1) * h, 0) / SQUARE(h);
+        if (_BoundaryLabel(i - 1, 0) == NOT_IN_CALCULATION) _F(k) += u((i - 1) * h, 0) / SQUARE(h);
+        if (_BoundaryLabel(i + 1, 0) == NOT_IN_CALCULATION) _F(k) += u((i + 1) * h, 0) / SQUARE(h);
     } else if (j == _ConnectedMesh.col() - 1) {
         _F(k) = (-1) * u.laplacian(i * h, (_ConnectedMesh.col() - 1) * h) + (2 / h) * u.partial_derivative_y(i * h, (_ConnectedMesh.col() - 1) * h);
-        if (i - 1 == 0) _F(k) += u(0, (_ConnectedMesh.col() - 1) * h) / SQUARE(h);
-        if (i + 1 == _ConnectedMesh.row() - 1) _F(k) += u((_ConnectedMesh.row() - 1) * h, (_ConnectedMesh.col() - 1) * h) / SQUARE(h);
+        if (_BoundaryLabel(i - 1, _ConnectedMesh.col() - 1) == NOT_IN_CALCULATION) _F(k) += u((i - 1) * h, (_ConnectedMesh.col() - 1) * h) / SQUARE(h);
+        if (_BoundaryLabel(i + 1, _ConnectedMesh.col() - 1) == NOT_IN_CALCULATION) _F(k) += u((i + 1) * h, (_ConnectedMesh.col() - 1) * h) / SQUARE(h);
     }
 }
 
@@ -466,7 +472,7 @@ void Solver::GenerateVector_F_CircleNeumann(const int k, const int i, const int 
                                                         NormalVector.second / NORM_2D(NormalVector.first, NormalVector.second));
         pair<double, double> PointOnCircle = make_pair((i - 1) * h + UnitNormalVector.first * d, 
                                                         j * h + UnitNormalVector.second * d);
-        double distance = h / MAX(abs(NormalVector.first), abs(NormalVector.second));
+        double distance = h / MAX(abs(UnitNormalVector.first), abs(UnitNormalVector.second));
         _F(k) += (u.partial_derivative_x(PointOnCircle.first, PointOnCircle.second) * (-UnitNormalVector.first) 
                 + u.partial_derivative_y(PointOnCircle.first, PointOnCircle.second) * (-UnitNormalVector.second)) * distance / SQUARE(h);
     }
@@ -477,7 +483,7 @@ void Solver::GenerateVector_F_CircleNeumann(const int k, const int i, const int 
                                                         NormalVector.second / NORM_2D(NormalVector.first, NormalVector.second));
         pair<double, double> PointOnCircle = make_pair((i + 1) * h + UnitNormalVector.first * d, 
                                                         j * h + UnitNormalVector.second * d);
-        double distance = h / MAX(abs(NormalVector.first), abs(NormalVector.second));
+        double distance = h / MAX(abs(UnitNormalVector.first), abs(UnitNormalVector.second));
         _F(k) += (u.partial_derivative_x(PointOnCircle.first, PointOnCircle.second) * (-UnitNormalVector.first) 
                 + u.partial_derivative_y(PointOnCircle.first, PointOnCircle.second) * (-UnitNormalVector.second)) * distance / SQUARE(h);
     }
@@ -488,7 +494,7 @@ void Solver::GenerateVector_F_CircleNeumann(const int k, const int i, const int 
                                                         NormalVector.second / NORM_2D(NormalVector.first, NormalVector.second));
         pair<double, double> PointOnCircle = make_pair(i * h + UnitNormalVector.first * d, 
                                                         (j - 1) * h + UnitNormalVector.second * d);
-        double distance = h / MAX(abs(NormalVector.first), abs(NormalVector.second));
+        double distance = h / MAX(abs(UnitNormalVector.first), abs(UnitNormalVector.second));
         _F(k) += (u.partial_derivative_x(PointOnCircle.first, PointOnCircle.second) * (-UnitNormalVector.first) 
                 + u.partial_derivative_y(PointOnCircle.first, PointOnCircle.second) * (-UnitNormalVector.second)) * distance / SQUARE(h);
     }
@@ -499,12 +505,11 @@ void Solver::GenerateVector_F_CircleNeumann(const int k, const int i, const int 
                                                         NormalVector.second / NORM_2D(NormalVector.first, NormalVector.second));
         pair<double, double> PointOnCircle = make_pair(i * h + UnitNormalVector.first * d, 
                                                         (j + 1) * h + UnitNormalVector.second * d);
-        double distance = h / MAX(abs(NormalVector.first), abs(NormalVector.second));
+        double distance = h / MAX(abs(UnitNormalVector.first), abs(UnitNormalVector.second));
         _F(k) += (u.partial_derivative_x(PointOnCircle.first, PointOnCircle.second) * (-UnitNormalVector.first) 
                 + u.partial_derivative_y(PointOnCircle.first, PointOnCircle.second) * (-UnitNormalVector.second)) * distance / SQUARE(h);
     }
 }
-
 
 /// @brief Solve the linear equation AU = F
 void Solver::SolveLinearEquation(const int NodeCount) {
@@ -528,7 +533,59 @@ void Solver::PrintResultFile(const TopologyInfo& topologyInfo, const BivariateFu
     for (int k = 0; k < _U.size(); k++) {
         int i = _NodeOrderToMesh(k).first;
         int j = _NodeOrderToMesh(k).second;
-        resultFile << setprecision(10) << i * h << " " << j * h << " " << _U(k) << " " << u(i * h, j * h) << endl;
+        resultFile << setprecision(20) << i * h << " " << j * h << " " << _U(k) << " " << u(i * h, j * h) << endl;
     }
     resultFile.close();
+    cout << "The result has been printed to output/data/result.txt" << endl;
+}
+
+/// @brief Print the L1 norm error of the solution to the file
+/// @param h 
+/// @param u 
+void Solver::PrintError_L1norm(const double h, const BivariateFunction& u) const {
+    double sum = 0;
+    for(int i = 0; i < _ConnectedMesh.row(); i++) {
+        for(int j = 0; j < _ConnectedMesh.col(); j++) {
+            int k = _MeshToNodeOrder(i, j);
+            double _U_hat = u(i * h, j * h);
+            if (_BoundaryLabel(i, j) != NOT_IN_CALCULATION) {
+                sum += abs(_U(_MeshToNodeOrder(i, j)) - _U_hat);
+            }
+        }
+    }
+    cout << "The 1-norm of the error is: " << SQUARE(h) * sum << endl;
+}
+
+/// @brief Print the L2 norm error of the solution to the file
+/// @param h
+/// @param u 
+void Solver::PrintError_L2norm(const double h, const BivariateFunction& u) const {
+    double sum = 0;
+    for(int i = 0; i < _ConnectedMesh.row(); i++) {
+        for(int j = 0; j < _ConnectedMesh.col(); j++) {
+            int k = _MeshToNodeOrder(i, j);
+            double _U_hat = u(i * h, j * h);
+            if (_BoundaryLabel(i, j) != NOT_IN_CALCULATION) {
+                sum += pow(abs(_U(_MeshToNodeOrder(i, j)) - _U_hat), 2);
+            }
+        }
+    }
+    cout << "The 2-norm of the error is: " << sqrt(SQUARE(h) * sum) << endl;
+}
+
+/// @brief Print the L-infinity norm error of the solution to the file
+/// @param h 
+/// @param u 
+void Solver::PrintError_Linfnorm(const double h, const BivariateFunction& u) const {
+    double max = 0;
+    for(int i = 0; i < _ConnectedMesh.row(); i++) {
+        for(int j = 0; j < _ConnectedMesh.col(); j++) {
+            int k = _MeshToNodeOrder(i, j);
+            double _U_hat = u(i * h, j * h);
+            if (_BoundaryLabel(i, j) != NOT_IN_CALCULATION) {
+                max = MAX(max, abs(_U(_MeshToNodeOrder(i, j)) - _U_hat));
+            }
+        }
+    }
+    cout << "The infinity-norm of the error is: " << max << endl;
 }

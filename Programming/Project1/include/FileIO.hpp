@@ -45,7 +45,8 @@ public:
     JsonInfo(const string &filename);
     void InitJsonInfo(const string &filename);
     TopologyInfo GetTopologyInfo() const;
-    void PrintJsonInfo() const;
+    int GetFunctionLabel() const {return _root["Funtion Label"].asInt();}
+    void PrintJsonInfo(const int FunctionLabel) const;
 };
 
 #endif

@@ -17,7 +17,7 @@ using namespace std;
 #define BOUNDARY_POINT 0
 
 // Define the macro for the boundary label
-#define NOT_IN_CALCULATION -1
+#define NOT_IN_CALCULATION 9
 #define NOT_BOUNDARY 0
 #define RECTANGLE_BOUNDARY_DIRICHLET 1
 #define RECTANGLE_BOUNDARY_NEUMANN 2

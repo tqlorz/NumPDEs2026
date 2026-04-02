@@ -44,8 +44,17 @@ TopologyInfo JsonInfo::GetTopologyInfo() const {
 }
 
 /// @brief Print the necessary information into terminal
-void JsonInfo::PrintJsonInfo() const {
+void JsonInfo::PrintJsonInfo(const int FunctionLabel) const {
     cout << "=============================================================" << endl;
+    switch (FunctionLabel) {
+        case 1: {cout << "function: u = exp(y+sin(x))" << endl; break;}
+        case 2: {cout << "function: u = x(1-x)y(1-y)" << endl; break;}
+        case 3: {cout << "function: u = sin(x)+sin(y)" << endl; break;}
+        default: {
+                cerr << "Error in main: the function label is invalid" << endl; 
+                exit(EXIT_SUCCESS);
+        }
+    }
     cout << "n: " << n() << endl;
     cout << "rectangle length: width = " << rectangle_width() << ", height = " << rectangle_height() << endl;
     cout << "rectangle boundary condtion: " << endl;

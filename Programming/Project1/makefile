@@ -30,8 +30,11 @@ $(OUTPUT_FIG_DIR):
 all: $(TARGET)
 	make run
 	make plot
+	make report
 run: $(TARGET)
 	./$(TARGET)
+report:
+	$(MAKE) -C doc
 plot: $(OUTPUT_DATA_DIR) $(OUTPUT_FIG_DIR)
 	python3 python/plot.py $(OUTPUT_DATA_DIR)/*.txt
 gdb: $(TARGET)

@@ -34,6 +34,8 @@ def PlotFigure(X, Y, numerical_grid, exact_grid, error_grid, figurename):
     ax1.set_xlabel('x')
     ax1.set_ylabel('y')
     ax1.set_zlabel('u')
+    ax1.set_xlim(0, 1)
+    ax1.set_ylim(0, 1)
     fig.colorbar(surf1, ax=ax1, shrink=0.5, aspect=10)
     
     # figure2：exact solution
@@ -43,16 +45,20 @@ def PlotFigure(X, Y, numerical_grid, exact_grid, error_grid, figurename):
     ax2.set_xlabel('x')
     ax2.set_ylabel('y')
     ax2.set_zlabel('u')
+    ax2.set_xlim(0, 1)
+    ax2.set_ylim(0, 1)
     fig.colorbar(surf2, ax=ax2, shrink=0.5, aspect=10)
     
     # figure3：error
-    ax3 = fig.add_subplot(1, 3, 3, projection='3d')
-    surf3 = ax3.plot_surface(X, Y, error_grid, cmap='coolwarm', edgecolor='none')
-    ax3.set_title('Error (Numerical - Exact)')
+    ax3 = fig.add_subplot(1, 3, 3)
+    heatmap = ax3.pcolormesh(X, Y, error_grid, cmap='coolwarm', shading='auto')
+    ax3.set_title('Error Heatmap (Numerical - Exact)')
     ax3.set_xlabel('x')
     ax3.set_ylabel('y')
-    ax3.set_zlabel('error')
-    fig.colorbar(surf3, ax=ax3, shrink=0.5, aspect=10)
+    ax3.set_aspect('equal', adjustable='box')
+    ax3.set_xlim(0, 1)
+    ax3.set_ylim(0, 1)
+    fig.colorbar(heatmap, ax=ax3, label='error')
     
     plt.tight_layout()
     plt.savefig(f"output/figure/{figurename}.pdf")

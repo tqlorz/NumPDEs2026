@@ -37,6 +37,9 @@ private:
     void GenerateMatrix_A(const int NodeCount, const double h, const Circle& circle);
     void GenerateVector_F(const int NodeCount, const double h, const BivariateFunction& u, const Circle& circle);
     void SolveLinearEquation(const int NodeCount);  
+    void PrintError_L1norm(const double h, const BivariateFunction& u) const;
+    void PrintError_L2norm(const double h, const BivariateFunction& u) const;
+    void PrintError_Linfnorm(const double h, const BivariateFunction& u) const;
     // Auiliary function
     int GetRectangleBoundaryLabel(const int i, const int j, const Rectangle& rectangle, 
                                     const vector<string>& rectangleBoundaryCondition) const;
