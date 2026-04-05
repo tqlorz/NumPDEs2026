@@ -1,0 +1,311 @@
+\documentclass[a4paper]{article}
+\usepackage{ctex}
+\usepackage[affil-it]{authblk}
+\usepackage[backend=bibtex,style=numeric]{biblatex}
+\usepackage{amsmath,amsthm,amssymb,amsfonts}
+\usepackage{graphicx}
+\usepackage{bm}
+
+\usepackage{geometry}
+\geometry{margin=1.5cm, vmargin={0pt,1cm}}
+\setlength{\topmargin}{-1cm}
+\setlength{\paperheight}{29.7cm}
+\setlength{\textheight}{25.3cm}
+
+\addbibresource{citation.bib}
+
+\begin{document}
+% =================================================
+\title{微分方程数值解 2026 春夏作业三}
+
+\author{曾申昊 3220100701
+  \thanks{邮箱: \texttt{3097714673@qq.com}
+                            \texttt{或} \texttt{3220100701@zju.edu.cn}}}
+\affil{浙江大学}
+
+\date{更新时间: \today}
+
+\maketitle
+
+% ============================================
+\section*{Exercise 12.14}
+
+\par 初值问题的积分形式为：
+\begin{gather}
+    \mathbf{v}(t) = \mathbf{v}_0 
+    + \int_a^t \mathbf{f}( , \mathbf{v}(s)) \mathrm{d}s\\
+    \mathbf{w}(t) = \mathbf{w}_0
+    + \int_a^t \mathbf{f}(s, \mathbf{w}(s)) \mathrm{d}s
+\end{gather}
+\par 两式相减并两边取范数，得到：
+\begin{equation}
+    \begin{aligned}
+        \|\mathbf{v}(t) - \mathbf{w}(t)\| 
+        &\leq \|\mathbf{v}_0 - \mathbf{w}_0\| 
+        + \int_a^t \|\mathbf{f}(s, \mathbf{v}(s)) - \mathbf{f}(s, \mathbf{w}(s))\| \mathrm{d}s\\
+        &\leq \|\mathbf{v}_0 - \mathbf{w}_0\| 
+        + L\int_a^t \|\mathbf{v}(s) - \mathbf{w}(s)\| \mathrm{d}s
+    \end{aligned}
+\end{equation}
+\par 由 Gronwall 不等式，得到：
+\begin{equation}
+    \|\mathbf{v}(t) - \mathbf{w}(t)\|
+    \leq \|\mathbf{v}_0 - \mathbf{w}_0\| e^{L(t-a)}
+\end{equation}
+
+\section*{Exercise 12.64}
+
+\par 梯形法的迭代公式为：
+\begin{equation}
+    \mathbf{U}^{n+1}
+    -\mathbf{U}^{n}
+    =k\left(
+        \frac{1}{2} \mathbf{f}\left(\mathbf{U}^{n+1}, t_{n+1}\right)
+        +\frac{1}{2} \mathbf{f}\left(\mathbf{U}^{n}, t_{n}\right)
+    \right)
+\end{equation}
+\par 进行 Taylor 展开，得到：
+\begin{equation}
+    \begin{aligned}
+        \mathcal{L}\mathbf{u}(t_n)
+        =&\ \mathbf{u}(t_{n+1})
+        -\mathbf{u}(t_{n})
+        -k\left(
+            \frac{1}{2} \mathbf{u}'(t_{n+1})
+            +\frac{1}{2} \mathbf{u}'(t_{n})
+        \right)\\
+        \approx&\left(
+            u(t_n) + k u'(t_n) + \frac{k^2}{2} u''(t_n) + \frac{k^3}{6} u'''(t_n) + \frac{k^4}{24} u^{(4)}(t_n)
+        \right)
+        -u(t_n)\\
+        &-k\left[
+            \frac{1}{2} \left(
+                u'(t_n) + k u''(t_n) + \frac{k^2}{2} u'''(t_n) + \frac{k^3}{6} u^{(4)}(t_n)
+            \right)
+            +\frac{1}{2} u'(t_{n})
+        \right]\\
+        = &\  \frac{k^3}{12} u'''(t_n) + \frac{k^4}{24} u^{(4)}(t_n)
+    \end{aligned}
+\end{equation}
+\par 因此 $C_0=C_1=C_2=0$，$C_3=\dfrac{1}{12}$，$C_4=\dfrac{1}{24}$。
+\par 中点法的迭代公式为：
+\begin{equation}
+    \mathbf{U}^{n+2}
+    -\mathbf{U}^{n}
+    =k\left(
+        2\mathbf{f}\left(\mathbf{U}^{n+1}, t_{n+1}\right)
+    \right)
+\end{equation}
+\par 进行 Taylor 展开，得到：
+\begin{equation}
+    \begin{aligned}
+        \mathcal{L}\mathbf{u}(t_n)
+        =&\ \mathbf{u}(t_{n+2})
+        -\mathbf{u}(t_{n})
+        -k\left(
+            2 \mathbf{u}'(t_{n+1})
+        \right)\\
+        \approx&\left(
+            u(t_n) + 2k u'(t_n) + \frac{(2k)^2}{2} u''(t_n) 
+            + \frac{(2k)^3}{6} u'''(t_n) + \frac{(2k)^4}{24} u^{(4)}(t_n)
+        \right)
+        -u(t_n)\\
+        &-k\left[
+            2 \left(
+                u'(t_n) + k u''(t_n) + \frac{k^2}{2} u'''(t_n) + \frac{k^3}{6} u^{(4)}(t_n)
+            \right)
+        \right]\\
+        = &\  \frac{k^3}{3} u'''(t_n) + \frac{k^4}{3} u^{(4)}(t_n)
+    \end{aligned}
+\end{equation}
+\par 因此 $C_0=C_1=C_2=0$，$C_3=\dfrac{1}{3}$，$C_4=\dfrac{1}{3}$。
+
+\section*{Exercise 12.66}
+
+\par $\left\|\mathcal{L}\mathbf{u}(t_n)\right\|=O(k^3)$ 等价于：
+\begin{gather}
+    \sum_{j=0}^{s}\alpha_j = 0\\
+    \sum_{j=0}^{s} j \alpha_j = \sum_{j=0}^{s} \beta_j\\
+    \frac{1}{2}\sum_{j=0}^{s} j^2 \alpha_j = \sum_{j=0}^{s} j \beta_j
+\end{gather}
+\par 用特征多项式表示为：
+\begin{gather}
+    \rho''(\zeta) = \sum_{j=0}^{s} j(j-1)\alpha_j \zeta^{j-2}
+    =\sum_{j=0}^{s} j^2\alpha_j \zeta^{j-2}-\sum_{j=0}^{s} j \alpha_j \zeta^{j-2}\\
+    \sigma''(\zeta) = \sum_{j=0}^{s} j(j-1)\beta_j \zeta^{j-2}
+    =\sum_{j=0}^{s} j^2\beta_j \zeta^{j-2}-\sum_{j=0}^{s} j \beta_j \zeta^{j-2}
+\end{gather}
+\par 等价于：
+\begin{gather}
+    \rho(1) = 0\\
+    \rho'(1) = \sigma(1)\\
+    \frac{1}{2}\left(
+        \rho''(1)
+        +\rho'(1)
+    \right) = \sigma'(1)
+\end{gather}
+
+\section*{Exercise 12.67}
+
+\par 对于 Adams-Bashforth 法有 $\alpha_s=1, \alpha_{s-1}=-1, 
+\alpha_1=\cdots=\alpha_{s-2}=0$ 以及 
+$\beta_s=0$。下面以 $s=3, p=3$ 为例进行待定系数法计算：
+\begin{equation}
+    \begin{bmatrix}
+        1 & 0 & 0 & 0 & 0 & 0 & 0 & 0\\
+        0 & 1 & 0 & 0 & 0 & 0 & 0 & 0\\
+        0 & 0 & 1 & 0 & 0 & 0 & 0 & 0\\
+        0 & 0 & 0 & 1 & 0 & 0 & 0 & 0\\
+        0 & 1 & 2 & 3 & -1 & -1 & -1 & -1\\
+        0 & \frac{1^2}{2} & \frac{2^2}{2} & \frac{3^2}{2} & 0 & -1 & -2 & -3\\
+        0 & \frac{1^3}{6} & \frac{2^3}{6} & \frac{3^3}{6} & 0 & -\frac{1^2}{2} & -\frac{2^2}{2} & \frac{3^2}{2}\\
+        0 & 0 & 0 & 0 & 0 & 0 & 0 & 1\\
+    \end{bmatrix}
+    \begin{bmatrix}
+        \alpha_0\\
+        \alpha_1\\
+        \alpha_2\\
+        \alpha_3\\
+        \beta_0\\
+        \beta_1\\
+        \beta_2\\
+        \beta_3\\
+    \end{bmatrix}
+    =
+    \begin{bmatrix}
+        0\\
+        0\\
+        -1\\
+        1\\
+        0\\
+        0\\
+        0\\
+        0\\
+    \end{bmatrix}
+\end{equation}
+\par 计算可得 $\beta_3=0$，$\beta_2=\dfrac{23}{12}$，
+$\beta_1=-\dfrac{16}{12}$，$\beta_0=\dfrac{5}{12}$。
+\par 对于 Adams-Moulton 法有 $\alpha_s=1, \alpha_{s-1}=-1, 
+\alpha_1=\cdots=\alpha_{s-2}=0$
+以及 $\beta_s\neq 0$。下面以 $s=2, p=3$ 为例进行待定系数法计算：
+\begin{equation}
+    \begin{bmatrix}
+        1 & 0 & 0 & 0 & 0 & 0 \\
+        0 & 1 & 0 & 0 & 0 & 0 \\
+        0 & 0 & 1 & 0 & 0 & 0 \\
+        0 & 1 & 2 & -1 & -1 & -1 \\
+        0 & \frac{1^2}{2} & \frac{2^2}{2}& 0 & -1 & -2\\
+        0 & \frac{1^3}{6} & \frac{2^3}{6}& 0 & -\frac{1^2}{2} & -\frac{2^2}{2}\\
+    \end{bmatrix}
+    \begin{bmatrix}
+        \alpha_0\\
+        \alpha_1\\
+        \alpha_2\\
+        \beta_0\\
+        \beta_1\\
+        \beta_2\\
+    \end{bmatrix}
+    =
+    \begin{bmatrix}
+        0\\
+        -1\\
+        1\\
+        0\\
+        0\\
+        0\\
+    \end{bmatrix}
+\end{equation}
+\par 计算可得 $\beta_2=\dfrac{5}{12}$，
+$\beta_1=\dfrac{8}{12}$，$\beta_0=-\dfrac{1}{12}$。
+\par 对于 BDF 法有 $\alpha_3=1$ 以及 $\beta_s\neq 0, 
+\beta_1=\cdots=\beta_{s-1}=0$。下面以 $s=3, p=3$ 为例进行待定系数法计算：
+\begin{equation}
+    \begin{bmatrix}
+        1 & 1 & 1 & 1 & 0 & 0 & 0 & 0\\
+        0 & 1 & 2 & 3 & -1 & -1 & -1 & -1\\
+        0 & \frac{1^2}{2} & \frac{2^2}{2} & \frac{3^2}{2} & 0 & -1 & -2 & -3\\
+        0 & 0 & 0 & 1 & 0 & 0 & 0 & 0\\
+        0 & 0 & 0 & 0 & 1 & 0 & 0 & 0\\
+        0 & 0 & 0 & 0 & 0 & 1 & 0 & 0\\
+        0 & 0 & 0 & 0 & 0 & 0 & 1 & 0\\
+        0 & \frac{1^3}{6} & \frac{2^3}{6} & \frac{3^3}{6} & 0 & -\frac{1^2}{2} & -\frac{2^2}{2} & \frac{3^2}{2}\\
+    \end{bmatrix}
+    \begin{bmatrix}
+        \alpha_0\\
+        \alpha_1\\
+        \alpha_2\\
+        \alpha_3\\
+        \beta_0\\
+        \beta_1\\
+        \beta_2\\
+        \beta_3\\
+    \end{bmatrix}
+    =
+    \begin{bmatrix}
+        0\\
+        0\\
+        0\\
+        1\\
+        0\\
+        0\\
+        0\\
+        0\\
+    \end{bmatrix}
+\end{equation}
+\par 计算可得 $\alpha_3=1$，$\alpha_2=-\dfrac{18}{11}$，
+$\alpha_1=\dfrac{9}{11}$，$\alpha_0=-\dfrac{2}{11}$
+以及 $\beta_3=\dfrac{6}{11}$。
+
+\section*{Exercise 12.72}
+
+\par 三阶精度的 BDF 法的特征多项式为：
+\begin{gather}
+    \rho(\zeta) = \sum_{j=0}^{s}\alpha_j \zeta^{j}
+    =-\frac{2}{11} + \frac{9}{11} \zeta - \frac{18}{11} \zeta^2 + \zeta^3\\
+    \sigma(\zeta) = \sum_{j=0}^{s}\beta_j \zeta^{j}
+    =\frac{6}{11} \zeta^3
+\end{gather}
+\par 应用 \textbf{Theorem 12.70}可得
+\begin{equation}
+    \begin{aligned}
+        \frac{\rho(z)}{\sigma(z)}
+        =&\ \frac{-\frac{2}{11} + \frac{9}{11} z - \frac{18}{11} z^2 + z^3}{\frac{6}{11} z^3}\\
+        =&-\frac{1}{3} \frac{1}{z^3} + \frac{3}{2} \frac{1}{z^2} - 3 \frac{1}{z} + \frac{11}{6}\\
+        =&-\frac{1}{3} \frac{1}{(1+z-1)^3} + \frac{3}{2} \frac{1}{(1+z-1)^2} - 3 \frac{1}{1+z-1} + \frac{11}{6}\\
+        =&-\frac{1}{3}\left(1-3(z-1)+6(z-1)^2-10(z-1)^3+15(z-1)^4+O((z-1))^5\right)\\
+         &+\frac{3}{2}\left(1-2(z-1)+3(z-1)^2-4(z-1)^3+5(z-1)^4+O((z-1))^5\right)\\
+         &-3\left(1-(z-1)+(z-1)^2-(z-1)^3+(z-1)^4+O((z-1))^5\right)+\frac{11}{6}\\
+        =&\ \left(
+            (z-1)-\frac{1}{2}(z-1)^2+\frac{1}{3}(z-1)^3-\frac{1}{2}(z-1)^4+O((z-1))^5
+        \right)
+    \end{aligned}
+\end{equation}
+\par 该 BDF 法的确是三阶精度的，
+四阶误差常数为 $-\dfrac{1}{4}$。
+
+\section*{Exercise 12.73}
+
+\par “$\Rightarrow$” 的证明：
+\par 由 \textbf{Definition 12.60} 可知一个 s-step 线性多步法
+由 $p$ 阶数精度等价于 $\mathcal{L}\mathbf{u}(t_n)=O(k^{p+1})$。
+对于任意 $\dfrac{d u}{dt}=q(t)$ ，$q(t)$ 为阶数小于 $p$ 的多项式，
+都有 $\dfrac{d^{p+1} u}{dt^{p+1}}=q^{(p)}(t)=0$，
+因此$\mathcal{L}\mathbf{u}(t_n)=0$，得到的解是精确的。
+
+\par “$\Leftarrow$” 的证明：
+\par 对于任意 $\dfrac{d u}{dt}=q(t)$ ，$q(t)$ 为阶数小于 $p$ 的多项式，
+都有 $\dfrac{d^{p+1} u}{dt^{p+1}}=q^{(p)}(t)=0$。
+对于任意函数 $u(t)$，用多项式逼近得到
+\begin{equation}
+    \mathcal{L}\mathbf{u}(t_n)
+    =\mathcal{L}\mathbf{u}(t_n) - \mathcal{L}\mathbf{p}(t_n)\\
+    =O(k^{p+1})
+\end{equation}
+\par 其中 $\mathbf{p}(t)$ 是用于逼近 $u(t)$ 的多项式，阶数小于 $p$。
+因此该 s-step 线性多步法有 $p$ 阶数精度。
+
+% ===============================================
+
+\printbibliography
+
+\end{document}
