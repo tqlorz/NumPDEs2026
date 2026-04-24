@@ -1,0 +1,23 @@
+{
+    "Method_Label": 1,
+    "p": 2,
+    "Time_Step": 0.01,
+    "Case_Label": 1,
+    "Case_Description": {
+        "Case_1" : {
+            "mu": 0.012277471,
+            "Total_Time": 17.06521656015796,
+            "Initial_Value": [0.944, 0, 0,
+                              0, -2.0015851063790825224, 0]
+        },
+        "Case_2" : {
+            "mu": 0.012277471,
+            "Total_Time": 19.140540691377,
+            "Initial_Value": [0.879779227778, 0, 0,
+                              0, -0.379677780949, 0]
+        }
+    },
+    "Method_Name": ["Adams-Bashforth", 
+                    "Adams-Moulton", 
+                    "BDFs"]
+}
