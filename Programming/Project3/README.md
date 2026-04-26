@@ -50,32 +50,12 @@ make
 sudo make install
 ```
 
-- `lapack`
-```
-# 从官网下载源代码
-wget https://github.com/Reference-LAPACK/lapack/archive/refs/tags/v3.12.0.tar.gz
-# 解压
-tar -zxvf v3.12.0.tar.gz
-cd lapack-3.12.0
-# make.inc 文件被包括在 lapack-3.12.0/Makefile 中
-cp make.inc.example make.inc
-# 用 make 编译
-make -j8
-# 到 LAPACKE 文件夹中编译
-cd LAPACKE
-make -j8
-# 将头文件添加到 /local/include 和 /local/lib
-sudo cp *.h /usr/local/include
-# 将位于 lapack-3.12.0 文件夹下的库添加到 /local/include 和 /local/lib
-sudo cp *.a /usr/local/lib 
-```
-
 #### 测试方法
 
 - 在根目录下使用 `make story` 可以在`doc`文件夹下编译产生报告。
 
 - 修改根目录下的 `template.json` 文件，并使用 `make run`，查看 `output/figure`
-文件夹下的 `result.pdf` ，来测试不同输入下的程序运行结果。
+文件夹下的 `XXX_pX_kXX.pdf` ，来测试不同输入下的程序运行结果。
 
 #### json 文件格式
 

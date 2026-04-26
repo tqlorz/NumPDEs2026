@@ -35,22 +35,29 @@ void JsonInfo::InitJsonInfo(const string &filename) {
 }
 
 const IVPInfo JsonInfo::GetIVPInfo() const {
+    // Get the method label and method name
     int MethodLabel = _root["Method_Label"].asInt();
-    string MethodName = _root["Method_Name"][MethodLabel-1].asString();
+    string MethodName;
+    if (MethodLabel == 1 || MethodLabel == 2 || MethodLabel == 3)  {
+        MethodName = _root["Method_Name"][MethodLabel-1].asString();
+    } else {
+        cerr << "Error in JsonInfo::GetIVPInfo: the method label is invalid" << endl;
+        exit(EXIT_SUCCESS);
+    }
+    // Get the value of ivp
     int p = _root["p"].asInt();
     double TimeStep = _root["Time_Step"].asDouble();
-
     int CaseLabel = _root["Case_Label"].asInt();
     double TotalTime, mu;
-    Vector_Double InitialValue;
+    Array InitialValue;
     switch (CaseLabel) {
         case 1: {
             TotalTime = _root["Case_Description"]["Case_1"]["Total_Time"].asDouble();
             mu = _root["Case_Description"]["Case_1"]["mu"].asDouble();
             int size = _root["Case_Description"]["Case_1"]["Initial_Value"].size();
-            InitialValue.init(size);
+            InitialValue.resize(size);
             for (int i = 0; i < size; ++i) {
-                InitialValue(i) = _root["Case_Description"]["Case_1"]["Initial_Value"][i].asDouble();
+                InitialValue[i] = _root["Case_Description"]["Case_1"]["Initial_Value"][i].asDouble();
             }
             break;
         }
@@ -58,9 +65,9 @@ const IVPInfo JsonInfo::GetIVPInfo() const {
             TotalTime = _root["Case_Description"]["Case_2"]["Total_Time"].asDouble();
             mu = _root["Case_Description"]["Case_2"]["mu"].asDouble();
             int size = _root["Case_Description"]["Case_2"]["Initial_Value"].size();
-            InitialValue.init(size);
+            InitialValue.resize(size);
             for (int i = 0; i < size; ++i) {
-                InitialValue(i) = _root["Case_Description"]["Case_2"]["Initial_Value"][i].asDouble();
+                InitialValue[i] = _root["Case_Description"]["Case_2"]["Initial_Value"][i].asDouble();
             }
             break;
         }
@@ -70,7 +77,39 @@ const IVPInfo JsonInfo::GetIVPInfo() const {
             break;
         }
     }
-    return IVPInfo(MethodName, p, mu, TimeStep, TotalTime, InitialValue);
+    // Check the validity of the json information
+    CheckJsonInfo(p, MethodLabel);
+    return IVPInfo(MethodName, p, mu, TimeStep, TotalTime, InitialValue, Example_func);
+}
+
+/// @brief Check the validity of the json information
+/// @param p 
+/// @param MethodName 
+void JsonInfo::CheckJsonInfo(const int p, const int MethodLabel) const {
+    switch (MethodLabel) {
+        case 1:
+            if (p < 1 || p > 4) {
+                cerr << "Error in JsonInfo::CheckJsonInfo: the value of p is invalid for ABMs" << endl;
+                exit(EXIT_SUCCESS);
+            }
+            break;
+        case 2:
+            if (p < 2 || p > 5) {
+                cerr << "Error in JsonInfo::CheckJsonInfo: the value of p is invalid for AMMs" << endl;
+                exit(EXIT_SUCCESS);
+            }
+            break;
+        case 3:
+            if (p < 1 || p > 4) {
+                cerr << "Error in JsonInfo::CheckJsonInfo: the value of p is invalid for BDFs" << endl;
+                exit(EXIT_SUCCESS);
+            }
+            break;
+        default:
+            cerr << "Error in JsonInfo::CheckJsonInfo: the method label is invalid" << endl;
+            exit(EXIT_SUCCESS);
+            break;
+    }
 }
 
 /// @brief Print the necessary information into terminal
@@ -84,7 +123,7 @@ void JsonInfo::PrintJsonInfo(const IVPInfo& IVPInfo) const {
     cout << "Initial Value: ";
     cout << "[";
     for (int i = 0; i < IVPInfo.InitialValue().size(); ++i) {
-        cout << setprecision(10) << IVPInfo.InitialValue()(i);
+        cout << setprecision(10) << IVPInfo.InitialValue()[i];
         if (i != IVPInfo.InitialValue().size() - 1) cout << ", ";
     }
     cout << "]" <<endl;

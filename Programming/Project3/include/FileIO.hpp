@@ -16,7 +16,8 @@
 #include <json/json.h>
 #include <iomanip>
 #include "IVPInfo.hpp"
-#include "MacroDef.hpp"
+#include "Array.hpp"
+#include "Function.hpp"
 
 using namespace std;
 
@@ -29,6 +30,7 @@ public:
     JsonInfo() = default;
     JsonInfo(const string &filename);
     void InitJsonInfo(const string &filename);
+    void CheckJsonInfo(const int p, const int MethodLabel) const;
     const IVPInfo GetIVPInfo() const;
     void PrintJsonInfo(const IVPInfo& IVPInfo) const;
 };
