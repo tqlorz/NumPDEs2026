@@ -51,6 +51,7 @@ void ABMs<p>::solve(const IVPInfo& IVPInfo){
         PrintResultFile(filename, u_history[s-1], t_n);
         t_n += TimeStep;
     }
+    u_end = u_history[s-1];
     cout << "Finished solving this IVP!" << endl;
     cout << "The result has been printed to " << filename << endl;
 }
@@ -129,6 +130,7 @@ void AMMs<p>::solve(const IVPInfo& IVPInfo){
         PrintResultFile(filename, u_history[s-1], t_n);
         t_n += TimeStep;
     }
+    u_end = u_history[s-1];
     cout << "Finished solving this IVP!" << endl;
     cout << "The result has been printed to " << filename << endl;
 }
@@ -145,16 +147,16 @@ vector<Array> AMMs<p>::OneStep(const IVPInfo& IVPInfo,
     classicalRK<4> predictor;
     res = u_history;
     res[s] = predictor.OneStep(IVPInfo, res[s-1], t_n);
-    int iterations = 3; // Number of iterations for the corrector
-    while (iterations > 0) {
+    int iter_max = 50; // Maximum number of iterations for the corrector
+    double tol = 1e-10; // Tolerance for convergence
+    for (int iter = 0; iter < iter_max; iter++) {
         Array corrected = res[s-1];
         for (int i = 0; i <= s; i++){
             corrected += TimeStep * Coefficients_AMMs[p-1].beta[i] * func(res[i], t_n + i * TimeStep, mu);
         }
+        if ((corrected - res[s]).size() < tol) break;
         res[s] = corrected;
-        iterations--;
-    }
-    
+    }    
     // Rotate the history to prepare for the next step
     rotate(res.begin(), res.begin() + 1, res.end());
     return res;
@@ -215,6 +217,7 @@ void BDFs<p>::solve(const IVPInfo& IVPInfo){
         PrintResultFile(filename, u_history[s-1], t_n);
         t_n += TimeStep;
     }
+    u_end = u_history[s-1];
     cout << "Finished solving this IVP!" << endl;
     cout << "The result has been printed to " << filename << endl;
 }
@@ -231,16 +234,16 @@ vector<Array> BDFs<p>::OneStep(const IVPInfo& IVPInfo,
     classicalRK<4> predictor;
     res = u_history;
     res[s] = predictor.OneStep(IVPInfo, res[s-1], t_n);
-    int iterations = 3; // Number of iterations for the corrector
-    while (iterations > 0) {
+    int iter_max = 50; // Maximum number of iterations for the corrector
+    double tol = 1e-10; // Tolerance for convergence
+    for (int iter = 0; iter < iter_max; iter++) {
         Array corrected = TimeStep * Coefficients_BDFs[p-1].beta[s] * func(res[s], t_n + s * TimeStep, mu);
         for (int i = 0; i <= s-1; i++){
             corrected -= Coefficients_BDFs[p-1].alpha[i] * res[i];
         }
+        if ((corrected - res[s]).size() < tol) break;
         res[s] = corrected;
-        iterations--;
-    }
-    
+    }    
     // Rotate the history to prepare for the next step
     rotate(res.begin(), res.begin() + 1, res.end());
     return res;

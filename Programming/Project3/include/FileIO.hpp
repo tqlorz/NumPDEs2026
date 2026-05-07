@@ -32,6 +32,7 @@ public:
     void InitJsonInfo(const string &filename);
     void CheckJsonInfo(const int p, const int MethodLabel) const;
     const IVPInfo GetIVPInfo() const;
+    int GetCaseLabel() { return _root["Case_Label"].asInt(); }
     void PrintJsonInfo(const IVPInfo& IVPInfo) const;
 };
 

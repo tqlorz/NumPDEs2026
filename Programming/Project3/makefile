@@ -48,3 +48,5 @@ gdb: $(TARGET)
 clean:
 	rm -f $(BUILD_DIR)/*.d $(BUILD_DIR)/*.o
 	rm -f $(TARGET)	
+	rm -f $(OUTPUT_DATA_DIR)/*.txt
+	rm -f $(OUTPUT_FIG_DIR)/*.pdf

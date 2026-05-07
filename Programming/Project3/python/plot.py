@@ -5,7 +5,7 @@ import sys
 
 def ReadFromFile(filename):
     # Define the column names for the data
-    df = pd.read_csv(filename, sep='\s+', header=None,
+    df = pd.read_csv(filename, sep=r'\s+', header=None,
                      names=['t', 'x', 'y', 'z', 'vx', 'vy', 'vz'])
     
     T = df['t'].values

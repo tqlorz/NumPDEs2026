@@ -57,6 +57,8 @@ sudo make install
 - 修改根目录下的 `template.json` 文件，并使用 `make run`，查看 `output/figure`
 文件夹下的 `XXX_pX_kXX.pdf` ，来测试不同输入下的程序运行结果。
 
+- 使用 `make clean` 清除结果文件
+
 #### json 文件格式
 
 ```

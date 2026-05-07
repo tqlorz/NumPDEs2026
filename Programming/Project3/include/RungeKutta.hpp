@@ -39,6 +39,7 @@ void classicalRK<p>::solve(const IVPInfo& IVPInfo){
         t_n += TimeStep;
         u_n = OneStep(IVPInfo, u_n, t_n);
     }
+    u_end = u_n;
     cout << "Finished solving this IVP!" << endl;
     cout << "The result has been printed to " << filename << endl;
 }

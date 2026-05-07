@@ -11,22 +11,13 @@
 #include "TimeIntegratorFactory.hpp"
 #include "RungeKutta.hpp"
 #include "LinearMultistep.hpp"
+#include "ResultAnalysis.hpp"
 
 int main(int argc, char *argv[]) {
     clock_t start, end;
     JsonInfo JsonInfo("template.json");
     const IVPInfo& IVPInfo = JsonInfo.GetIVPInfo();
     JsonInfo.PrintJsonInfo(IVPInfo);
-    auto& factory = TimeIntegratorFactory::GetInstance();
-    TimeIntegrator* integrator = factory.CreateTimeIntegrator(IVPInfo.MethodName(), IVPInfo.p());
-    if(integrator){
-        cout << "=============================================================" << endl;
-        start = clock();
-        integrator->solve(IVPInfo);
-        end = clock();
-        delete integrator;
-        cout << "Execution time: " << ((double)(end - start)) / CLOCKS_PER_SEC << " seconds" << endl;
-        cout << "=============================================================" << endl;
-    }
+    ResultAnalysis(IVPInfo, JsonInfo.GetCaseLabel());
     return 0;
 }

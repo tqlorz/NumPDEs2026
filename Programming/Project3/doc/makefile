@@ -22,4 +22,4 @@ all:
 	make clean
 
 clean:
-	rm -f *.aux *.log *.out *.toc *.bbl *.run.xml *.blg 
+	rm -f *.aux *.log *.out *.toc *.bbl *.run.xml *.blg *.fls *.fdb_latexmk

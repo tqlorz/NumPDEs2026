@@ -8,6 +8,7 @@
 #define _MACRODEF_
 
 #include <vector>
+#include "Array.hpp"
 
 using namespace std;
 
@@ -35,7 +36,7 @@ const vector<Coefficients_LMM> Coefficients_AMMs = {
 };
 // Coefficients for BDFs methods of p = 1-4
 const vector<Coefficients_LMM> Coefficients_BDFs = {
-    { {-1.0, 1.0}, {1.0, 0}, 1 },
+    { {-1.0, 1.0}, {0, 1.0}, 1 },
     { {1.0/3, -4.0/3, 1.0}, {0, 0, 2.0/3}, 2 },
     { {-2.0/11, 9.0/11, -18.0/11, 1.0}, {0, 0, 0, 6.0/11}, 3 },
     { {3.0/25, -16.0/25, 36.0/25, -48.0/25, 1.0}, {0, 0, 0, 0, 12.0/25}, 4 }
@@ -61,6 +62,46 @@ const vector<Coefficients_RK> Coefficients_classicalRK = {
        {1.0/2, 0, 0, 0}, 
        {0, 1.0/2, 0, 0}, 
        {0, 0, 1.0, 0}}, {1.0/6, 2.0/6, 2.0/6, 1.0/6}, {0, 1.0/2, 1.0/2, 1.0}, 4 }
+};
+
+// Define norm types for error calculation
+class Norm{
+public:
+    virtual double operator()(const Array& A) const = 0;
+};
+
+class L1Norm : public Norm {
+public:
+    double operator()(const Array& A) const {
+        double sum = 0.0;
+        for (int i = 0; i < A.size(); i++) {
+            sum += abs(A[i]);
+        }
+        return sum;
+    }
+};
+
+class L2Norm : public Norm {
+public:
+    double operator()(const Array& A) const {
+        double sum = 0.0;
+        for (int i = 0; i < A.size(); i++) {
+            sum += A[i] * A[i];
+        }
+        return sqrt(sum);
+    }
+};
+
+class LinfNorm : public Norm {
+public:
+    double operator()(const Array& A) const {
+        double max_val = 0.0;
+        for (int i = 0; i < A.size(); i++) {
+            double val = abs(A[i]);
+            if (val > max_val) { max_val = val; }
+        }
+        return max_val;
+    }
 };
 
 #endif
