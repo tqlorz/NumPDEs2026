@@ -50,7 +50,7 @@ struct Coefficients_RK {
     int p2s;
 };
 typedef struct Coefficients_RK Coefficients_RK;
-// Coefficients for classical Runge-Kutta methods of p = 1-4
+// Coefficients for classical Runge-Kutta methods of p = 1-5
 const vector<Coefficients_RK> Coefficients_classicalRK = {
     { {{0}}, {1.0}, {0}, 1 },
     { {{0, 0}, 
@@ -61,7 +61,15 @@ const vector<Coefficients_RK> Coefficients_classicalRK = {
     { {{0, 0, 0, 0}, 
        {1.0/2, 0, 0, 0}, 
        {0, 1.0/2, 0, 0}, 
-       {0, 0, 1.0, 0}}, {1.0/6, 2.0/6, 2.0/6, 1.0/6}, {0, 1.0/2, 1.0/2, 1.0}, 4 }
+       {0, 0, 1.0, 0}}, {1.0/6, 2.0/6, 2.0/6, 1.0/6}, {0, 1.0/2, 1.0/2, 1.0}, 4},
+    { {{0, 0, 0, 0, 0, 0},
+       {1.0/4, 0, 0, 0, 0, 0},
+       {1.0/8, 1.0/8, 0, 0, 0, 0},
+       {0, 0, 1.0/2, 0, 0, 0},
+       {3.0/16, 0, 0, 9.0/16, 0, 0},
+       {-3.0/7, 2.0/7, 12.0/7, -12.0/7, 8.0/7, 0}},
+      {7.0/90, 0, 16.0/45, 2.0/15, 16.0/45, 7.0/90},
+      {0, 1.0/4, 1.0/4, 1.0/2, 3.0/4, 1.0}, 6 }
 };
 
 // Define norm types for error calculation

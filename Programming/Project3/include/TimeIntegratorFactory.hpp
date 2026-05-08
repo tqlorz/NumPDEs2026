@@ -136,6 +136,9 @@ inline void Register_classicalRK(){
             case 4:
                 return (TimeIntegrator*) new classicalRK<4>();
                 break;
+            case 5:
+                return (TimeIntegrator*) new classicalRK<5>();
+                break;
             default:
                 return (TimeIntegrator*) nullptr;
         }

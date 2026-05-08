@@ -77,7 +77,7 @@ vector<Array> ABMs<p>::OneStep(const IVPInfo& IVPInfo,
 
 template <int p>
 vector<Array> ABMs<p>::Initialize(const IVPInfo& IVPInfo){
-    classicalRK<4> integrator;
+    classicalRK<5> integrator;
     int s = Coefficients_ABMs[p-1].p2s;
     vector<Array> u_history(s+1);
     
@@ -144,17 +144,18 @@ vector<Array> AMMs<p>::OneStep(const IVPInfo& IVPInfo,
     // Compute the n+s-th step using ABMs to predict the n+s-th step, and then use AMMs to correct it
     int s = Coefficients_AMMs[p-1].p2s;
     vector<Array> res(s+1);
-    classicalRK<4> predictor;
+    classicalRK<5> predictor;
     res = u_history;
     res[s] = predictor.OneStep(IVPInfo, res[s-1], t_n);
     int iter_max = 50; // Maximum number of iterations for the corrector
     double tol = 1e-10; // Tolerance for convergence
+    LinfNorm infNorm;
     for (int iter = 0; iter < iter_max; iter++) {
         Array corrected = res[s-1];
         for (int i = 0; i <= s; i++){
             corrected += TimeStep * Coefficients_AMMs[p-1].beta[i] * func(res[i], t_n + i * TimeStep, mu);
         }
-        if ((corrected - res[s]).size() < tol) break;
+        if (infNorm(corrected - res[s]) < tol) break;
         res[s] = corrected;
     }    
     // Rotate the history to prepare for the next step
@@ -164,7 +165,7 @@ vector<Array> AMMs<p>::OneStep(const IVPInfo& IVPInfo,
 
 template <int p>
 vector<Array> AMMs<p>::Initialize(const IVPInfo& IVPInfo){
-    classicalRK<4> integrator;
+    classicalRK<5> integrator;
     int s = Coefficients_AMMs[p-1].p2s;
     vector<Array> u_history(s+1);
     
@@ -231,17 +232,18 @@ vector<Array> BDFs<p>::OneStep(const IVPInfo& IVPInfo,
     // Compute the n+s-th step using ABMs to predict the n+s-th step, and then use BDFs to correct it
     int s = Coefficients_BDFs[p-1].p2s;
     vector<Array> res(s+1);
-    classicalRK<4> predictor;
+    classicalRK<5> predictor;
     res = u_history;
     res[s] = predictor.OneStep(IVPInfo, res[s-1], t_n);
     int iter_max = 50; // Maximum number of iterations for the corrector
     double tol = 1e-10; // Tolerance for convergence
+    LinfNorm infNorm;
     for (int iter = 0; iter < iter_max; iter++) {
         Array corrected = TimeStep * Coefficients_BDFs[p-1].beta[s] * func(res[s], t_n + s * TimeStep, mu);
         for (int i = 0; i <= s-1; i++){
             corrected -= Coefficients_BDFs[p-1].alpha[i] * res[i];
         }
-        if ((corrected - res[s]).size() < tol) break;
+        if (infNorm(corrected - res[s]) < tol) break;
         res[s] = corrected;
     }    
     // Rotate the history to prepare for the next step
@@ -251,7 +253,7 @@ vector<Array> BDFs<p>::OneStep(const IVPInfo& IVPInfo,
 
 template <int p>
 vector<Array> BDFs<p>::Initialize(const IVPInfo& IVPInfo){
-    classicalRK<4> integrator;
+    classicalRK<5> integrator;
     int s = Coefficients_BDFs[p-1].p2s;
     vector<Array> u_history(s+1);
     
