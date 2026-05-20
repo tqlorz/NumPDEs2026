@@ -1,0 +1,419 @@
+\documentclass[a4paper]{article}
+\usepackage{ctex}
+\usepackage[affil-it]{authblk}
+\usepackage[backend=bibtex,style=numeric]{biblatex}
+\usepackage{amsmath,amsthm,amssymb,amsfonts}
+\usepackage{graphicx}
+\usepackage{caption, subcaption}
+\usepackage{bm}
+
+\usepackage{geometry}
+\geometry{margin=1.5cm, vmargin={0pt,1cm}}
+\setlength{\topmargin}{-1cm}
+\setlength{\paperheight}{29.7cm}
+\setlength{\textheight}{25.3cm}
+
+\addbibresource{citation.bib}
+
+\begin{document}
+% =================================================
+\title{微分方程数值解 2026 春夏作业七}
+
+\author{曾申昊 3220100701
+  \thanks{邮箱: \texttt{3097714673@qq.com}
+                            \texttt{或} \texttt{3220100701@zju.edu.cn}}}
+\affil{浙江大学}
+
+\date{更新时间: \today}
+
+\maketitle
+
+% ============================================
+
+\section*{Exercise 13.81}
+
+\par 四阶 Runge-Kutta 方法的 Butcher 表如下：
+\begin{table}[htbp]
+    \centering
+    \caption{四阶 Runge-Kutta 方法的 Butcher 表}
+    \begin{tabular}{c|cccc}
+        0 & 0 & 0 & 0 & 0 \\
+        $\frac{1}{2}$ & $\frac{1}{2}$ & 0 & 0 & 0 \\
+        $\frac{1}{2}$ & 0 & $\frac{1}{2}$ & 0 & 0 \\
+        1 & 0 & 0 & 1 & 0 \\
+        \hline
+         & $\frac{1}{6}$ & $\frac{1}{3}$ & $\frac{1}{3}$ & $\frac{1}{6}$
+    \end{tabular}
+\end{table}
+\par 为了验证 $\mathcal{L}\mathbf{u}(t_n) = O(k^5)$，
+可以直接计算阶条件：
+\begin{equation}
+    \begin{cases}
+        \forall l = 1, 2, 3, 4\\
+        \forall m = 0, 1, \cdots, 4-l\\
+    \end{cases}
+    \qquad
+    \mathbf{b}^T A^m C^{l-1}\mathbf{1} = \frac{(l-1)!}{(l+m)!}
+\end{equation}
+\par 分别验证各种 $(l, m)$ 取值的情况：
+\begin{equation}
+    \begin{cases}
+        (1, 0): \mathbf{b}^T \mathbf{1} = \sum_{i} b_i= 1 = \frac{0!}{1!} \\
+        (1, 1): \mathbf{b}^T A \mathbf{1} = b_2a_{21}+b_3a_{32}+b_4a_{43} = \frac{1}{2} = \frac{0!}{2!} \\
+        (1, 2): \mathbf{b}^T A^2 \mathbf{1} = b_3a_{32}a_{21}+b_4a_{43}a_{32}=\frac{1}{6} = \frac{0!}{3!} \\
+        (1, 3): \mathbf{b}^T A^3 \mathbf{1} = b_4a_{43}a_{32}a_{21}=\frac{1}{24} = \frac{0!}{4!} \\
+        (2, 0): \mathbf{b}^T C \mathbf{1} = \sum_{i} b_ic_i=\frac{1}{2} = \frac{1!}{2!} \\
+        (2, 1): \mathbf{b}^T A C \mathbf{1} = b_2a_{21}c_1+b_3a_{32}c_2+b_4a_{43}c_3=\frac{1}{6} = \frac{1!}{3!}\\
+        (2, 2): \mathbf{b}^T A^2 C \mathbf{1} = b_3a_{32}a_{21}c_1+b_4a_{43}a_{32}c_2=\frac{1}{24} = \frac{1!}{4!} \\
+        (3, 0): \mathbf{b}^T C^2 \mathbf{1} = \sum_{i} b_ic_i^2=\frac{1}{3}= \frac{2!}{3!}  \\
+        (3, 1): \mathbf{b}^T A C^2 \mathbf{1} = b_2a_{21}c_1^2+b_3a_{32}c_2^2+b_4a_{43}c_3^2=\frac{1}{12} =\frac{2!}{4!}\\
+        (4, 0): \mathbf{b}^T C^3 \mathbf{1} = \sum_{i} b_ic_i^3=\frac{1}{4}= \frac{3!}{4!} 
+    \end{cases}
+\end{equation}
+\par 综上可得，四阶 Runge-Kutta 方法满足阶条件。
+
+\section*{Exercise 13.87}
+
+\begin{equation}
+    \begin{aligned}
+        R(z) &= 1 + z\mathbf{b}^T (I-zA)^{-1}\mathbf{1} \\
+        &= 1 + z 
+        \begin{pmatrix}
+            \frac{1}{6} & \frac{1}{3} & \frac{1}{3} & \frac{1}{6}
+        \end{pmatrix}
+        \begin{pmatrix}
+            1 & 0 & 0 & 0 \\
+            -\frac{z}{2} & 1 & 0 & 0 \\
+            0 & -\frac{z}{2} & 1 & 0 \\
+            0 & 0 & -z & 1
+        \end{pmatrix}^{-1}
+        \begin{pmatrix}
+            1 \\ 1 \\ 1 \\ 1
+        \end{pmatrix} \\
+        &= 1 + z 
+        \begin{pmatrix}
+            \frac{1}{6} & \frac{1}{3} & \frac{1}{3} & \frac{1}{6}
+        \end{pmatrix}
+        \begin{pmatrix}
+            1 & 0 & 0 & 0 \\
+            \frac{z}{2} & 1 & 0 & 0 \\
+            \frac{z^2}{4} & \frac{z}{2} & 1 & 0 \\
+            \frac{z^3}{4} & \frac{z^2}{2} & z & 1
+        \end{pmatrix}
+        \begin{pmatrix}
+            1 \\ 1 \\ 1 \\ 1
+        \end{pmatrix} \\
+        &= 1 + z + \frac{1}{2} z^2
+        + \frac{1}{6} z^3 + \frac{1}{24} z^4
+    \end{aligned}    
+\end{equation}
+
+\section*{Exercise 13.91}
+
+\par 由 \textbf{Corollary 13.89} 可知， 
+$s$ 步 $s$ 阶的 ERK 方法的稳定函数为
+\begin{equation}
+    R(z) = \sum_{j=0}^s \frac{z^j}{j!}
+\end{equation}
+\par 因此 1 到 3 阶 ERK 方法的稳定域分别为
+\begin{gather}
+    S_1 = \left\{z \in \mathbb{C} : \left|1+z\right| \leq 1\right\} \\
+    S_2 = \left\{z \in \mathbb{C} : \left|1+z+\frac{1}{2} z^2\right| \leq 1\right\} \\
+    S_3 = \left\{z \in \mathbb{C} : \left|1+z+\frac{1}{2} z^2 + \frac{1}{6} z^3\right| \leq 1\right\}
+\end{gather}
+\par 下面证明 $S_1 \subset S_2 \subset S_3$：
+\begin{itemize}
+    \item $S_1 \subset S_2$\\
+    令 $1+z=w$ 代入得
+    \begin{equation}
+        \left|w\right| \leq 1
+    \end{equation}
+    对于 $z \in S_1$，有 $|w| \leq 1$，因此
+    \begin{equation}
+        \begin{aligned}
+            \left|1+z+\frac{1}{2} z^2\right| &= \left|w + \frac{1}{2} (w-1)^2\right| \\
+            &= \left|\frac{1}{2} + \frac{1}{2} w^2\right| \\
+            &\leq \frac{1}{2} + \frac{1}{2}\left|w^2\right| \leq 1
+        \end{aligned}
+    \end{equation}
+    \item $S_2 \subset S_3$\\
+    令 $1+z= w$ ， 代入得
+    \begin{equation}
+        \left|1+w^2\right| \leq 2
+    \end{equation}
+    对于 $z \in S_2$，有 $|1+w^2| \leq 1$，另外
+    \begin{equation}
+        \begin{aligned}
+            \left|1+z+\frac{1}{2} z^2 + \frac{1}{6} z^3\right| 
+            &= \left|w + \frac{1}{2} (w-1)^2 + \frac{1}{6} (w-1)^3\right| \\
+            &= \left|\frac{1}{3} + \frac{1}{2} w + \frac{1}{6} w^3\right| \\
+        \end{aligned}
+    \end{equation}
+    由最大模定理，只需证明 $|1+w^2| = 2$ 时 $|2 + 3 w + w^3| \leq 6$。
+    令 $1+w^2=2e^{i\theta}$，则有
+    \begin{equation}
+        \begin{aligned}
+            \left|2 + 3 w + w^3\right|
+            &= \left|
+                2 + 2 w +w(1+w^2)
+            \right|\\
+            &= \left|
+                2 + 2 w (1+e^{i\theta})
+            \right| \\
+        \end{aligned}
+    \end{equation}
+    令 $u = w (1+e^{i\theta})$ 有
+    \begin{equation}
+        \begin{aligned}
+            u^2 &= w^2 (1+e^{i\theta})^2\\
+            &= (2e^{i\theta}-1)(1+2e^{i\theta}+e^{2i\theta}) \\
+            &= 2 e^{3i\theta} + 3 e^{2i\theta} -1
+        \end{aligned}
+    \end{equation}
+    并且有
+    \begin{equation}
+        \left|u^2\right| = 
+        \sqrt{
+            14+12\cos \theta
+        -4\cos 3\theta
+        -6\cos 2\theta
+        }
+    \end{equation}
+    \begin{equation}
+        \Re(u^2) = 2 \cos 3\theta + 3 \cos 2\theta -1
+    \end{equation}
+    \begin{equation}
+        \begin{aligned}
+            \Re(u) &= |u|\cos \phi\\
+            &= |u| \sqrt{\frac{1+\cos 2\phi}{2}}\\
+            &= \sqrt{\frac{|u|^2+\Re(u^2)}{2}}
+        \end{aligned}
+    \end{equation}
+    其中 $\phi = \text{arg}\ u$。 最后有
+    \begin{equation}
+        \begin{aligned}
+            \left|2 + 3 w + w^3\right| ^2
+            &= \left|
+                2 + 2 u
+            \right|^2 \\
+            &= 4\left(
+                1 + 2\Re(u) + |u|^2
+            \right)\\
+            &\leq 36
+        \end{aligned}
+    \end{equation}
+\end{itemize}
+\par 对于更高阶数不一定成立，因为例如不存在
+5步5阶的 ERK 方法。
+
+\section*{Exercise 13.97}
+
+\begin{itemize}
+    \item “$\Rightarrow$”：\\
+    若 $\deg Q(z) = \deg P(z)$ 则有
+    \begin{equation}
+        \lim_{z\to \infty} \left|R(z)\right| 
+        = \lim_{z\to \infty} \left|
+            \frac{P(z)}{Q(z)}
+        \right|
+        = C \neq 0
+    \end{equation}
+    若 $\deg Q(z) < \deg P(z)$ 则有
+    \begin{equation}
+        \lim_{z\to \infty} \left|R(z)\right| 
+        = \lim_{z\to \infty} \left|
+            \frac{P(z)}{Q(z)}
+        \right|
+        = \infty
+    \end{equation}
+    与 L-stable 的定义 $\displaystyle\lim_{z\to \infty} |R(z)| = 0$ 产生矛盾。
+    \item “$\Leftarrow$”：\\
+    此时 $\deg Q(z) > \deg P(z)$，那么
+    当 $z \to \infty$ 时
+    \begin{equation}
+        \left|R(z)\right| 
+        = \left|
+            \frac{P(z)}{Q(z)}
+        \right|
+        \sim \left|
+            \frac{a_m z^m}{b_n z^n}
+        \right| = \left|\frac{a_m}{b_n}\right| \cdot \left|z\right|^{m-n}
+        \to 0
+    \end{equation}
+    其中 $m = \deg P(z)$， $n = \deg Q(z)$， $a_m$ 和 $b_n$ 分别为 $P(z)$ 和 $Q(z)$ 的最高次项的系数。
+    由于 $m - n < 0$，因此 $\displaystyle\lim_{z\to \infty} |R(z)| = 0$，
+    该方法满足 L-stable 的定义。
+\end{itemize}
+
+\section*{Exercise 13.100}
+
+\begin{equation}
+    \begin{aligned}
+        \lim_{z\to \infty} 
+        &= \lim_{z\to \infty} \left(
+            1+z\mathbf{b}^T\left(
+                I-zA
+            \right)^{-1}\mathbf{1}
+        \right)\\
+        &= \lim_{z\to \infty} \left(
+            1+\mathbf{b}^T\left(
+                \frac{1}{z}I-A
+            \right)^{-1}\mathbf{1}
+        \right)\\
+        &=1-\mathbf{b}^TA^{-1}\mathbf{1}\\
+        &=1-\mathbf{b}^T\frac{1}{b_1}\mathbf{e}_1=0
+    \end{aligned}
+\end{equation}
+\par 其中 $\mathbf{e}_1 = [1, 0, \ldots, 0]^T$ 。
+
+\section*{Exercise 13.105}
+
+\par 3步5阶配点法的 Butcher 表如下
+\begin{table}[htbp]
+    \centering
+    \caption{3步5阶配点法的 Butcher 表}
+    \begin{tabular}{c|ccc}
+        $\frac{4-\sqrt{6}}{10}$ & $\frac{88-7\sqrt{6}}{360}$ & $\frac{296-169\sqrt{6}}{1800}$ & $\frac{-2+3\sqrt{6}}{225}$ \\
+        $\frac{4+\sqrt{6}}{10}$ & $\frac{296+169\sqrt{6}}{1800}$ & $\frac{88+7\sqrt{6}}{360}$ & $\frac{-2-3\sqrt{6}}{225}$\\
+        1 & $\frac{16-\sqrt{6}}{36}$ & $\frac{16+\sqrt{6}}{36}$ & $\frac{1}{9}$ \\
+        \hline
+         & $\frac{16-\sqrt{6}}{36}$ & $\frac{16+\sqrt{6}}{36}$ & $\frac{1}{9}$
+    \end{tabular}
+\end{table}
+\par 以 $c_1$， $c_2$ 和 $c_3$ 为根的多项式为
+\begin{equation}
+    P(t) = (t-1)\left(
+        t^2-\frac{4}{5}t+\frac{1}{10}
+    \right)
+    = t^3 - \frac{9}{5}t^2 + \frac{9}{10}t - \frac{1}{10}
+\end{equation}
+\par 下面验证 $b_i$ 和 $c_i$ 的 $B(r)$ 条件：
+\begin{equation}
+    \begin{aligned}
+        \sum_{j=1}^3 b_j &= 
+        \frac{16-\sqrt{6}}{36} + \frac{16+\sqrt{6}}{36} + \frac{1}{9} = 1\\
+        \sum_{j=1}^3 b_j c_j &= 
+        \frac{16-\sqrt{6}}{36}\cdot \frac{4-\sqrt{6}}{10} 
+        + \frac{16+\sqrt{6}}{36}\cdot \frac{4+\sqrt{6}}{10} 
+        + \frac{1}{9}\cdot 1 = \frac{1}{2} \\
+        \sum_{j=1}^3 b_j c_j^2 &=
+        \frac{16-\sqrt{6}}{36}\cdot \left(\frac{4-\sqrt{6}}{10} \right)^2
+        + \frac{16+\sqrt{6}}{36}\cdot \left(\frac{4+\sqrt{6}}{10} \right)^2
+        + \frac{1}{9}\cdot 1^2  = \frac{1}{3} \\
+        \sum_{j=1}^3 b_j c_j^3 &= 
+        \frac{16-\sqrt{6}}{36}\cdot \left(\frac{4-\sqrt{6}}{10} \right)^3
+        + \frac{16+\sqrt{6}}{36}\cdot \left(\frac{4+\sqrt{6}}{10} \right)^3
+        + \frac{1}{9}\cdot 1^3  = \frac{1}{4}\\
+        \sum_{j=1}^3 b_j c_j^4 &= 
+        \frac{16-\sqrt{6}}{36}\cdot \left(\frac{4-\sqrt{6}}{10} \right)^4
+        + \frac{16+\sqrt{6}}{36}\cdot \left(\frac{4+\sqrt{6}}{10} \right)^4
+        + \frac{1}{9}\cdot 1^4 = \frac{1}{5}\\
+        \sum_{j=1}^3 b_j c_j^5 &= 
+        \frac{16-\sqrt{6}}{36}\cdot \left(\frac{4-\sqrt{6}}{10} \right)^5
+        + \frac{16+\sqrt{6}}{36}\cdot \left(\frac{4+\sqrt{6}}{10} \right)^5
+        + \frac{1}{9}\cdot 1^5 = \frac{101}{600} \neq \frac{1}{6}
+    \end{aligned}
+\end{equation}
+\par 不难验证 $I_s(1), \cdots, I_s(x^4)$ 都是精确的，而 $I_s(x^5)$ 不是精确的。
+由 \textbf{Theorem 13.68} 得，该方法的阶数为 5。
+另外不难发现 $a_{s,j} = b_j$ 对于 $j = 1, 2, 3$ 都成立，
+由 \textbf{Theorem 13.99} 可知要证明该方法是 L-stable 的，
+只需证明该方法是 A-stable 的。
+\par 这里直接计算 $I-zA$ 的逆矩阵是不现实的，应该假设
+$R(z)$ 具有如下形式并利用泰勒展开来确定 $R(z)$ 的分子和分母的系数：
+\begin{equation}
+    \begin{aligned}
+        R(z) &= \frac{1 + a_1 z + a_2 z^2}
+        {1 + b_1 z + b_2 z^2 + b_3 z^3}\\ 
+        &\to e^{z} = 1 + z + \frac{1}{2} z^2 + \frac{1}{6} z^3 + \cdots
+    \end{aligned}
+\end{equation}
+\par 最后计算得到
+\begin{equation}
+    R(z) = \frac{1 + \frac{1}{3} z + \frac{1}{30} z^2}
+        {1 - \frac{2}{3} z + \frac{1}{10} z^2 - \frac{1}{120} z^3}
+\end{equation}
+\par 根据 \textbf{Theorem 13.95}，
+为证明该方法是 A-stable 的，只需证明
+它是 I-stable 的，并且 $R(z)$ 的极点实部都为正。
+\begin{equation}
+    \begin{gathered}
+        \left|
+            1+\frac{1}{3}iy - \frac{1}{30} y^2
+        \right|^2
+        \leq \left|
+            1 - \frac{2}{3} iy - \frac{1}{10} y^2 - \frac{1}{120} i y^3
+        \right|^2\\
+        \Leftrightarrow 
+        \quad
+        1- \frac{1}{15} y^2 + \frac{1}{900} y^4 + \frac{1}{9} y^2
+        \leq 
+        1- \frac{1}{5} y^2 + \frac{1}{100} y^4
+        +\frac{4}{9}y^2- \frac{1}{90} y^4 + \frac{1}{14400} y^6\\
+        \Leftrightarrow 
+        \quad
+        0\leq \frac{1}{5}y^2+\frac{1}{14400}y^6
+    \end{gathered}
+\end{equation}
+\par 显然成立，因此该方法是 I-stable 的。
+另外 $R(z)$ 的极点为 $0.5698$， $0.2151 + 1.3071i$ 和 $0.2151 - 1.3071i$，
+实部都为正，因此该方法是 A-stable 的。
+综上可得，该方法是 L-stable 的。
+
+\section*{Exercise 13.114}
+
+\par 隐式中点法的迭代公式为
+\begin{equation}
+    \mathbf{U}^{n+1} = \mathbf{U}^n + k \mathbf{f}\left(
+        \frac{\mathbf{U}^n + \mathbf{U}^{n+1}}{2}, t_n + \frac{k}{2}
+    \right)
+\end{equation}
+\par 将其写为标准 RK 方法的形式为
+\begin{equation}
+    \begin{cases}
+        \mathbf{y}_1 = \mathbf{f}\left(
+            \frac{\mathbf{U}^n + \mathbf{U}^{n+1}}{2}, t_n + \frac{k}{2}
+        \right) 
+        =\mathbf{f}\left(
+            \mathbf{U}^n + \frac{k}{2}\mathbf{y}_1, t_n + \frac{k}{2}
+        \right)\\
+        \mathbf{U}^{n+1} = \mathbf{U}^n + k\mathbf{y}_1
+    \end{cases}
+\end{equation}
+\par 相应的 Butcher 表为
+\begin{table}[htbp]
+    \centering
+    \caption{隐式中点法的 Butcher 表}
+    \begin{tabular}{c|c}
+        $\frac{1}{2}$ & $\frac{1}{2}$ \\
+        \hline
+         & 1
+    \end{tabular}
+\end{table}
+\par 令 $\mathbf{e}^n = \mathbf{U}^n - \mathbf{V}^n$，则有
+\begin{equation}
+    \begin{aligned}
+        \left\langle\mathbf{e}^{n+1}, \frac{\mathbf{e}^{n+1}+\mathbf{e}^{n}}{2}\right\rangle
+        &=\left\langle\mathbf{e}^{n}+k\left[
+            \mathbf{f}\left(
+                \frac{\mathbf{U}^{n+1} + \mathbf{U}^n}{2}, t_n + \frac{k}{2}
+            \right)
+            -\mathbf{f}\left(
+                \frac{\mathbf{V}^{n+1} + \mathbf{V}^n}{2}, t_n + \frac{k}{2}
+            \right)
+        \right], \frac{\mathbf{e}^{n+1}+\mathbf{e}^{n}}{2}\right\rangle \\
+        &=\left\langle\mathbf{e}^{n}, 
+        \frac{\mathbf{e}^{n+1}+\mathbf{e}^{n}}{2}\right\rangle \\
+    \end{aligned}
+\end{equation}
+\par 第二步中使用了 $\mathbf{f}$ 的单调性。由此可得
+\begin{equation}
+    \left\|\mathbf{e}^{n+1}\right\|^2 \leq \left\|\mathbf{e}^{n}\right\|^2
+\end{equation}
+\par 由上式可知隐式中点法是 B-stable 的。
+
+% ===============================================
+
+\printbibliography
+
+\end{document}
