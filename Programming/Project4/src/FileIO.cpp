@@ -1,0 +1,161 @@
+/**
+ * @file          FileIO.cpp
+ * @author        zsh945
+ * @date          2026-04-24
+ */
+
+#include "FileIO.hpp"
+
+/// @brief JsonInfo constructor
+/// @param filename 
+JsonInfo::JsonInfo(const string &filename) {
+    InitJsonInfo(filename);
+}
+
+/// @brief Open the json file and parse the data
+/// @param filename
+void JsonInfo::InitJsonInfo(const string &filename) {
+    ifstream infile(filename);
+    if(!infile.is_open()) {
+        cerr << "Error in ReadJsonFile: fail to open file" << endl; 
+        exit(EXIT_SUCCESS);
+    }       
+
+    Json::CharReaderBuilder ReaderBuilder;
+    ReaderBuilder["emitUTF8"] = true;
+
+    string errs;
+    if (!Json::parseFromStream(ReaderBuilder, infile, &_root, &errs)) {
+        cerr << "Error in ReadJsonFile: fail to parse Json" << endl;
+        exit(EXIT_SUCCESS); 
+    }
+
+    cout << "The data has been read from " << filename << endl;
+    infile.close();
+}
+
+const IVPInfo JsonInfo::GetIVPInfo() const {
+    // Get the method label and method name
+    int MethodLabel = _root["Method_Label"].asInt();
+    string MethodName;
+    if (MethodLabel >= 1 && MethodLabel <= 8)  {
+        MethodName = _root["Method_Name"][MethodLabel-1].asString();
+    } else {
+        cerr << "Error in JsonInfo::GetIVPInfo: the method label is invalid" << endl;
+        exit(EXIT_SUCCESS);
+    }
+    // Get the value of ivp
+    int p = _root["p"].asInt();
+    double TimeStep = _root["Time_Step"].asDouble();
+    int CaseLabel = _root["Case_Label"].asInt();
+    double TotalTime, mu;
+    Array InitialValue;
+    switch (CaseLabel) {
+        case 1: {
+            TotalTime = _root["Case_Description"]["Case_1"]["Total_Time"].asDouble();
+            mu = _root["Case_Description"]["Case_1"]["mu"].asDouble();
+            int size = _root["Case_Description"]["Case_1"]["Initial_Value"].size();
+            InitialValue.resize(size);
+            for (int i = 0; i < size; ++i) {
+                InitialValue[i] = _root["Case_Description"]["Case_1"]["Initial_Value"][i].asDouble();
+            }
+            break;
+        }
+        case 2: {
+            TotalTime = _root["Case_Description"]["Case_2"]["Total_Time"].asDouble();
+            mu = _root["Case_Description"]["Case_2"]["mu"].asDouble();
+            int size = _root["Case_Description"]["Case_2"]["Initial_Value"].size();
+            InitialValue.resize(size);
+            for (int i = 0; i < size; ++i) {
+                InitialValue[i] = _root["Case_Description"]["Case_2"]["Initial_Value"][i].asDouble();
+            }
+            break;
+        }
+        default:{
+            cerr << "Error in JsonInfo::IVPInfo: the case label is invalid" << endl;
+            exit(EXIT_SUCCESS);
+            break;
+        }
+    }
+    // Check the validity of the json information
+    CheckJsonInfo(p, MethodLabel);
+    return IVPInfo(MethodName, p, mu, TimeStep, TotalTime, InitialValue, Example_func);
+}
+
+/// @brief Check the validity of the json information
+/// @param p 
+/// @param MethodName 
+void JsonInfo::CheckJsonInfo(const int p, const int MethodLabel) const {
+    switch (MethodLabel) {
+        case 1:
+            if (p < 1 || p > 4) {
+                cerr << "Error in JsonInfo::CheckJsonInfo: the value of p is invalid for ABMs, it should be between 1 and 4" << endl;
+                exit(EXIT_SUCCESS);
+            }
+            break;
+        case 2:
+            if (p < 2 || p > 5) {
+                cerr << "Error in JsonInfo::CheckJsonInfo: the value of p is invalid for AMMs, it should be between 2 and 5" << endl;
+                exit(EXIT_SUCCESS);
+            }
+            break;
+        case 3:
+            if (p < 1 || p > 4) {
+                cerr << "Error in JsonInfo::CheckJsonInfo: the value of p is invalid for BDFs, it should be between 1 and 4" << endl;
+                exit(EXIT_SUCCESS);
+            }
+            break;
+        case 4:
+            if (p != 4) {
+                cerr << "Error in JsonInfo::CheckJsonInfo: the value of p is invalid for classicalRK, it should be 4" << endl;
+                exit(EXIT_SUCCESS);
+            }
+            break;
+        case 5:
+            if (p != 4) {
+                cerr << "Error in JsonInfo::CheckJsonInfo: the value of p is invalid for ESDIRK, it should be 4" << endl;
+                exit(EXIT_SUCCESS);
+            }
+            break;
+        case 6:
+            if (p != 4 && p != 6 && p != 8 && p != 10) {
+                cerr << "Error in JsonInfo::CheckJsonInfo: the value of p is invalid for Gauss-Legendre RK, it should be 4, 6, 8, or 10" << endl;
+                exit(EXIT_SUCCESS);
+            }
+            break;
+        case 7:
+            if (p != 4 && p != 5) {
+                cerr << "Error in JsonInfo::CheckJsonInfo: the value of p is invalid for Fehlberg45, it should be 4 or 5" << endl;
+                exit(EXIT_SUCCESS);
+            }
+            break;
+        case 8:
+            if (p != 4 && p != 5) {
+                cerr << "Error in JsonInfo::CheckJsonInfo: the value of p is invalid for DormandPrince54, it should be 4 or 5" << endl;
+                exit(EXIT_SUCCESS);
+            }
+            break;
+        default:
+            cerr << "Error in JsonInfo::CheckJsonInfo: the method label is invalid" << endl;
+            exit(EXIT_SUCCESS);
+            break;
+    }
+}
+
+/// @brief Print the necessary information into terminal
+void JsonInfo::PrintJsonInfo(const IVPInfo& ivpInfo) const {
+    cout << "=============================================================" << endl;
+    cout << "Method Name: " << ivpInfo.MethodName() << endl;
+    cout << "p: " << ivpInfo.p() << endl;
+    cout << "mu: " << ivpInfo.mu() << endl;
+    cout << "Time Step: " << ivpInfo.TimeStep() << endl;
+    cout << "Total Time: " << ivpInfo.TotalTime() << endl;
+    cout << "Initial Value: ";
+    cout << "[";
+    for (int i = 0; i < ivpInfo.InitialValue().size(); ++i) {
+        cout << setprecision(10) << ivpInfo.InitialValue()[i];
+        if (i != ivpInfo.InitialValue().size() - 1) cout << ", ";
+    }
+    cout << "]" <<endl;
+    cout << "=============================================================" << endl;
+}
