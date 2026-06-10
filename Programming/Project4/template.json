@@ -1,7 +1,7 @@
 {
-    "Method_Label": 8,
-    "p": 4,
-    "Time_Step": 1,
+    "Method_Label": 6,
+    "p": 10,
+    "Time_Step": 0.00025,
     "Case_Label": 1,
     "Case_Description": {
         "Case_1" : {

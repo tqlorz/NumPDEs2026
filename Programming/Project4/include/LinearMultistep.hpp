@@ -18,13 +18,11 @@ using namespace std;
 // =========================================================================
 /// @brief The base class for LinearMultistep time integrators
 class LinearMultistep : public TimeIntegrator {
-protected:
-    Array u_end;
+private:
 public:    
     LinearMultistep() = default;
     ~LinearMultistep() = default;
     virtual void solve(const IVPInfo& IVPInfo) = 0;
-    Array solution() const { return u_end; }
 };
 
 // =========================================================================

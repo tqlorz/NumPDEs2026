@@ -106,8 +106,8 @@ void JsonInfo::CheckJsonInfo(const int p, const int MethodLabel) const {
             }
             break;
         case 4:
-            if (p != 4) {
-                cerr << "Error in JsonInfo::CheckJsonInfo: the value of p is invalid for classicalRK, it should be 4" << endl;
+            if (p < 1 || p > 5) {
+                cerr << "Error in JsonInfo::CheckJsonInfo: the value of p is invalid for classicalRK, it should be between 1 and 5" << endl;
                 exit(EXIT_SUCCESS);
             }
             break;

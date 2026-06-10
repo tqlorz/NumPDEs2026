@@ -155,4 +155,19 @@ inline double sum(const Array& a) {
     return res;
 }
 
+// Matrix-vector multiplication
+inline Array MatrixVectorProduct(const std::vector<std::vector<double>>& A, const Array& x) {
+    size_t m = A.size();
+    size_t n = A[0].size();
+    assert(x.size() == n);
+    Array res(m);
+    for (size_t i = 0; i < m; i++) {
+        res[i] = 0.0;
+        for (size_t j = 0; j < n; j++) {
+            res[i] += A[i][j] * x[j];
+        }
+    }
+    return res;
+}
+
 #endif

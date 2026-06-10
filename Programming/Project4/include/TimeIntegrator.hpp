@@ -21,11 +21,13 @@ using namespace std;
 
 /// @brief The base class for time integrators
 class TimeIntegrator {
-private:
+protected:
+    Array u_end;
 public:
     TimeIntegrator() = default;
     ~TimeIntegrator() = default;
     virtual void solve(const IVPInfo& IVPInfo) = 0;
+    Array solution() const { return u_end; }
 };
 
 void PrintResultFile(const string& filename, const Array& u, const double t);

@@ -1,6 +1,6 @@
 # set compiler and flags
 CXX       = g++
-CXXFLAGS  = -std=c++20 -g
+CXXFLAGS  = -std=c++20 -g -O2
 INCLUDES  = -Iinclude
 CFLAGS = -ljsoncpp -fPIC
 # set directories
@@ -17,7 +17,7 @@ DEPS      = $(OBJS:.o=.d)
 TXT_FILES = $(wildcard $(OUTPUT_DATA_DIR)/*.txt)
 FIG_FILES = $(TXT_FILES:.txt=.pdf)
 
-.PHONY: clean run plot gdb story
+.PHONY: clean run plot gdb story clean-results
 # compile and link
 $(TARGET): $(OBJS) | $(BUILD_DIR) $(OUTPUT_DATA_DIR)
 	$(CXX) $(CXXFLAGS) $^ -o $@ $(CFLAGS)
@@ -48,5 +48,8 @@ gdb: $(TARGET)
 clean:
 	rm -f $(BUILD_DIR)/*.d $(BUILD_DIR)/*.o
 	rm -f $(TARGET)	
+	rm -f $(OUTPUT_DATA_DIR)/*.txt
+	rm -f $(OUTPUT_FIG_DIR)/*.pdf
+clean-results:
 	rm -f $(OUTPUT_DATA_DIR)/*.txt
 	rm -f $(OUTPUT_FIG_DIR)/*.pdf

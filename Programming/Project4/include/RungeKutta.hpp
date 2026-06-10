@@ -11,6 +11,7 @@
 #include <iostream>
 #include <utility>
 #include "TimeIntegrator.hpp"
+#include "NewtonMethod.hpp"
 #include "Norm.hpp"
 #include "Coefficients.hpp"
 
@@ -19,13 +20,11 @@ using namespace std;
 // =========================================================================
 /// @brief The base class for Runge-Kutta time integrators
 class RungeKutta : public TimeIntegrator {
-protected:
-    Array u_end;
+private:
 public:    
     RungeKutta() = default;
     ~RungeKutta() = default;
     virtual void solve(const IVPInfo& IVPInfo) = 0;
-    Array solution() const { return u_end; }
 };
 
 // =========================================================================
@@ -103,12 +102,101 @@ public:
 };
 
 inline void ESDIRK::solve(const IVPInfo& IVPInfo){
-    
+    cout << "Solving the IVP with ESDIRK ..." << endl;
+    double TimeStep = IVPInfo.TimeStep();
+    double TotalTime = IVPInfo.TotalTime();
+    int NumSteps = static_cast<int>(floor(TotalTime / TimeStep));
+    string filename = "output/data/" + IVPInfo.MethodName() + "_p" + to_string(4) + "_k" + to_string(TimeStep) + ".txt";
+    // Compute the solution at each time step
+    Array u_n = IVPInfo.InitialValue();
+    double t_n = 0;
+    for (int i = 0; i <= NumSteps; i++){
+        PrintResultFile(filename, u_n, t_n);
+        t_n += TimeStep;
+        u_n = OneStep(IVPInfo, u_n, t_n);
+    }
+    u_end = u_n;
+    cout << "Finished solving this IVP!" << endl;
+    cout << "The result has been printed to " << filename << endl;
 }
 
 inline Array ESDIRK::OneStep(const IVPInfo& IVPInfo, 
                                 const Array& u_n, const double t_n){
-    return u_n;
+    double mu = IVPInfo.mu();
+    double TimeStep = IVPInfo.TimeStep();
+    const Function<Array, Array, double, double>& func = IVPInfo.func();
+    int index = p2index(Coefficients_ESDIRK, 4);
+    int s = Coefficients_ESDIRK[index].s;
+    int m = static_cast<int>(u_n.size());
+
+    auto GetStage = [&](const Array& U, const int stage) -> Array {
+        Array stage_value(m);
+        for (int j = 0; j < m; j++){
+            stage_value[j] = U[(stage - 1) * m + j];
+        }
+        return stage_value;
+    };
+
+    Array u_stage_0 = u_n;
+    Array y_0 = func(u_stage_0, t_n + Coefficients_ESDIRK[index].c[0] * TimeStep, mu);
+
+    Array U0((s - 1) * m);
+    vector<Array> u_predict(s);
+    vector<Array> y_predict(s);
+    u_predict[0] = u_stage_0;
+    y_predict[0] = y_0;
+    for (int i = 1; i < s; i++){
+        u_predict[i] = u_n;
+        for (int j = 0; j < i; j++){
+            u_predict[i] += TimeStep * Coefficients_ESDIRK[index].a[i][j] * y_predict[j];
+        }
+        double t = t_n + Coefficients_ESDIRK[index].c[i] * TimeStep;
+        y_predict[i] = func(u_predict[i], t, mu);
+        for (int j = 0; j < m; j++){
+            U0[(i - 1) * m + j] = u_predict[i][j];
+        }
+    }
+
+    auto F = [&](const Array& U) -> Array {
+        vector<Array> u_stage(s);
+        vector<Array> y(s);
+        u_stage[0] = u_stage_0;
+        y[0] = y_0;
+        for (int i = 1; i < s; i++){
+            u_stage[i] = GetStage(U, i);
+            double t = t_n + Coefficients_ESDIRK[index].c[i] * TimeStep;
+            y[i] = func(u_stage[i], t, mu);
+        }
+
+        Array res((s - 1) * m);
+        for (int i = 1; i < s; i++){
+            Array equation = u_stage[i] - u_n;
+            for (int j = 0; j <= i; j++){
+                equation -= TimeStep * Coefficients_ESDIRK[index].a[i][j] * y[j];
+            }
+            for (int j = 0; j < m; j++){
+                res[(i - 1) * m + j] = equation[j];
+            }
+        }
+        return res;
+    };
+
+    NewtonMethod newton;
+    Array U = newton.solve(F, U0, 1e-10, 50);
+
+    vector<Array> y(s);
+    y[0] = y_0;
+    for (int i = 1; i < s; i++){
+        Array u_stage = GetStage(U, i);
+        double t = t_n + Coefficients_ESDIRK[index].c[i] * TimeStep;
+        y[i] = func(u_stage, t, mu);
+    }
+    // Compute the next step
+    Array res = u_n;
+    for (int i = 0; i < s; i++){
+        res += TimeStep * Coefficients_ESDIRK[index].b[i] * y[i];
+    }
+    return res;
 }
 
 // =========================================================================
@@ -127,13 +215,91 @@ public:
 
 template <int p>
 void GaussLegendreRK<p>::solve(const IVPInfo& IVPInfo){
-
+    cout << "Solving the IVP with GaussLegendreRK of order " << p << " ..." << endl;
+    double TimeStep = IVPInfo.TimeStep();
+    double TotalTime = IVPInfo.TotalTime();
+    int NumSteps = static_cast<int>(floor(TotalTime / TimeStep));
+    string filename = "output/data/" + IVPInfo.MethodName() + "_p" + to_string(p) + "_k" + to_string(TimeStep) + ".txt";
+    // Compute the solution at each time step
+    Array u_n = IVPInfo.InitialValue();
+    double t_n = 0;
+    for (int i = 0; i <= NumSteps; i++){
+        PrintResultFile(filename, u_n, t_n);
+        t_n += TimeStep;
+        u_n = OneStep(IVPInfo, u_n, t_n);
+    }
+    u_end = u_n;
+    cout << "Finished solving this IVP!" << endl;
+    cout << "The result has been printed to " << filename << endl;
 }
 
 template <int p>
 Array GaussLegendreRK<p>::OneStep(const IVPInfo& IVPInfo, 
-                                const Array& u_n, const double t_n){    
-    return u_n;
+                                const Array& u_n, const double t_n){
+    double mu = IVPInfo.mu();
+    double TimeStep = IVPInfo.TimeStep();
+    const Function<Array, Array, double, double>& func = IVPInfo.func();
+    int index = p2index(Coefficients_GaussLegendre, p);
+    if (index < 0){
+        cerr << "Error in GaussLegendreRK::OneStep: the order is invalid" << endl;
+        exit(EXIT_SUCCESS);
+    }
+    int s = Coefficients_GaussLegendre[index].s;
+    int m = static_cast<int>(u_n.size());
+
+    auto GetStage = [&](const Array& U, const int stage) -> Array {
+        Array stage_value(m);
+        for (int j = 0; j < m; j++){
+            stage_value[j] = U[stage * m + j];
+        }
+        return stage_value;
+    };
+
+    auto F = [&](const Array& U) -> Array {
+        vector<Array> u_stage(s);
+        vector<Array> y(s);
+        for (int i = 0; i < s; i++){
+            u_stage[i] = GetStage(U, i);
+            double t = t_n + Coefficients_GaussLegendre[index].c[i] * TimeStep;
+            y[i] = func(u_stage[i], t, mu);
+        }
+
+        Array res(s * m);
+        for (int i = 0; i < s; i++){
+            Array equation = u_stage[i] - u_n;
+            for (int j = 0; j < s; j++){
+                equation -= TimeStep * Coefficients_GaussLegendre[index].a[i][j] * y[j];
+            }
+            for (int j = 0; j < m; j++){
+                res[i * m + j] = equation[j];
+            }
+        }
+        return res;
+    };
+
+    Array U0(s * m);
+    Array f0 = func(u_n, t_n, mu);
+    for (int i = 0; i < s; i++){
+        for (int j = 0; j < m; j++){
+            U0[i * m + j] = u_n[j] + Coefficients_GaussLegendre[index].c[i] * TimeStep * f0[j];
+        }
+    }
+
+    NewtonMethod newton;
+    Array U = newton.solve(F, U0);
+
+    vector<Array> y(s);
+    for (int i = 0; i < s; i++){
+        Array u_stage = GetStage(U, i);
+        double t = t_n + Coefficients_GaussLegendre[index].c[i] * TimeStep;
+        y[i] = func(u_stage, t, mu);
+    }
+
+    Array res = u_n;
+    for (int i = 0; i < s; i++){
+        res += TimeStep * Coefficients_GaussLegendre[index].b[i] * y[i];
+    }
+    return res;
 }
 
 // =========================================================================

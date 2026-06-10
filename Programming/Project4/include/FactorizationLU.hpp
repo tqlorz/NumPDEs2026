@@ -17,6 +17,7 @@ class FactorizationLU {
 private:
     vector<vector<double>> _L;
     vector<vector<double>> _U;
+    vector<int> _pivots;
 public:
     FactorizationLU() = default;
     ~FactorizationLU() = default;
